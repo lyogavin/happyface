@@ -1,8 +1,8 @@
-
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import Link from "next/link"
 import type React from "react"
+import { ProfileMenu } from "@/app/components/ProfileMenu"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,13 +24,14 @@ export default function RootLayout({
             <Link href="/" className="text-xl font-bold text-purple-600">
               Happy Face AI
             </Link>
-            <div className="space-x-4">
+            <div className="flex items-center space-x-4">
               <Link href="/" className="text-gray-600 hover:text-gray-900">
                 Home
               </Link>
               <Link href="/editor" className="text-gray-600 hover:text-gray-900">
                 Editor
               </Link>
+              <ProfileMenu />
             </div>
           </div>
         </nav>
