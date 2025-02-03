@@ -128,7 +128,7 @@ export default function EditorPage() {
       ) : (
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-500 text-lg mb-4">You haven't generated any images yet.</p>
+            <p className="text-gray-500 text-lg mb-4">You haven&apos;t generated any images yet.</p>
             <p className="text-gray-400">Use the prompt input above to create your first Happy Face!</p>
             <Image
               src="/placeholder.svg?height=200&width=200&text=No Images Yet"
