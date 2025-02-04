@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClerkClient } from '@clerk/backend';
+import { createClerkClient } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
 import { appConfig } from '@/lib/app-config';
 
