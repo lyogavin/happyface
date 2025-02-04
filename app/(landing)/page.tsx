@@ -151,8 +151,10 @@ export default function LandingPage() {
                     Priority support
                   </li>
                 </ul>
-                <Button className="w-full" size="lg">
-                  Start 3-Day Free Trial
+                <Button className="w-full" size="lg" asChild>
+                  <Link href="https://buy.stripe.com/test_eVa3eUdqQ77R7uM288">
+                    Start 3-Day Free Trial
+                  </Link>
                 </Button>
                 <p className="text-sm text-gray-600 text-center mt-4">No charge if cancelled within the trial period</p>
               </div>
