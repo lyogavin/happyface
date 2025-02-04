@@ -248,23 +248,15 @@ export default function EditorPage() {
             <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
               {currentImage ? (
                 <Image
-                  src={currentImage || "/placeholder.svg"}
+                  src={currentImage}
                   alt="Generated Happy Face"
-                  width={512}
-                  height={512}
-                  className="rounded-lg shadow-lg"
-                />
-              ) : uploadedImage ? (
-                <Image
-                  src={uploadedImage || "/placeholder.svg"}
-                  alt="Uploaded Image"
                   width={512}
                   height={512}
                   className="rounded-lg shadow-lg"
                 />
               ) : (
                 <div className="text-center">
-                  <p className="text-gray-500 mb-4">Your generated or uploaded image will appear here</p>
+                  <p className="text-gray-500 mb-4">Your generated image will appear here</p>
                   <Image
                     src="/placeholder.svg?height=200&width=200&text=Happy Face"
                     alt="Placeholder"
