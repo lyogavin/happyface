@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import Link from "next/link"
 import type React from "react"
 import { ProfileMenu } from "@/app/components/ProfileMenu"
+import { CreditsBadge } from "@/app/components/CreditsBadge"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,12 +26,7 @@ export default function RootLayout({
               Happy Face AI
             </Link>
             <div className="flex items-center space-x-4">
-              <Link href="/" className="text-gray-600 hover:text-gray-900">
-                Home
-              </Link>
-              <Link href="/editor" className="text-gray-600 hover:text-gray-900">
-                Editor
-              </Link>
+              <CreditsBadge />
               <ProfileMenu />
             </div>
           </div>

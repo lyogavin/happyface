@@ -36,7 +36,8 @@ export const getStripePortalSession = async (stripe_id: string | null, email: st
 
 export const getUserSubscriptionStatus = async (user_id: string) => {
   // Check if in local development
-  if (process.env.NODE_ENV === 'development') {
+  const MOCK_LOCAL = false;
+  if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
     return { 
       status: 'active',
       type: 'pro',
@@ -48,11 +49,30 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   const { data, error } = await supabaseClient
     .from('happyface_users')
     .select('stripe_id, credits')
-    .eq('clerk_id', user_id)
-    .single();
+    .eq('clerk_id', user_id);
+
+  // check no rows found
+  if (data  && data.length === 0) {
+    // when no rows found, create a new row
+    const { data, error } = await supabaseClient
+      .from('happyface_users')
+      .insert({ clerk_id: user_id, credits: 5 }); // default credits to 5
+
+    if (error) {
+      console.error("Error creating new row for user", user_id, error);
+    }
+
+    console.log("created new row for user", user_id);
+    return {
+      status: 'active',
+      type: 'credits',
+      credits: 5
+    };
+  }
 
   if (error) {
     console.error("Error fetching user data:", error);
+    
     return { 
       status: 'inactive',
       type: 'free',
@@ -61,40 +81,12 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   }
 
   // Check credits first
-  if (data.credits > 0) {
+  if (data[0].credits > 0) {
     return {
       status: 'active',
       type: 'credits',
-      credits: data.credits
+      credits: data[0].credits
     };
-  }
-
-  // Check Stripe subscription if stripe_id exists
-  if (data.stripe_id) {
-    try {
-      const subscriptions = await stripeClient.subscriptions.list({
-        customer: data.stripe_id,
-        limit: 1
-      });
-
-      if (subscriptions.data.length > 0) {
-        const subscription = subscriptions.data[0];
-        const priceId = subscription.items.data[0].price.id;
-        
-        // Match with your pricing configuration
-        const plan = appConfig.prices.find(p => 
-          p.monthlyPriceId === priceId || p.yearlyPriceId === priceId
-        );
-
-        return {
-          status: subscription.status,
-          type: plan?.name.toLowerCase() || 'unknown',
-          credits: 0
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching Stripe subscription:", error);
-    }
   }
 
   // Default return for users with no subscription or credits
@@ -103,4 +95,20 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
     type: 'free',
     credits: 0
   };
+};
+
+export const getUserGenerations = async (user_id: string) => {
+  const { data, error } = await supabaseClient
+    .from('happyface_generations')
+    .select('output_url')
+    .eq('user_id', user_id)
+    .order('created_at', { ascending: false })
+    .limit(20); // Limit to most recent 20 generations
+
+  if (error) {
+    console.error("Error fetching user generations:", error);
+    return [];
+  }
+
+  return data.map(generation => generation.output_url);
 };

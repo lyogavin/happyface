@@ -1,25 +1,39 @@
 export const appConfig = {
   appName: 'HappyFaceAI.com',
   name: 'Happy Face AI',
+  comfyuiHost: 'http://125.136.64.90:40657',
   prices: [
     {
-      id: 'premium',
-      name: 'Premium Plan',
-      description: 'Perfect for individuals',
-      monthlyPrice: 999, // in cents
-      yearlyPrice: 9990, // in cents
-      monthlyPriceId: 'price_test_monthly',
-      yearlyPriceId: 'price_test_yearly',
+      id: 'credits-30',
+      name: '30 Credits',
+      description: 'Perfect for trying out',
+      price: 290, // in cents ($2.90)
+      credits: 30,
       features: [
-        'Unlimited happy face generations',
+        '30 happy face generations',
         'High-resolution outputs',
-        'Priority support'
+        'Pay as you go'
+      ],
+      isMostPopular: false,
+      url: 'https://buy.stripe.com/test_4gwbLqgD22RBaGY9AB',
+      priceId: 'price_1Qon9ZGhn5OuLuumwtgZ10q4'
+    },
+    {
+      id: 'credits-80',
+      name: '80 Credits',
+      description: 'Best value',
+      price: 590, // in cents ($5.90)
+      credits: 80,
+      features: [
+        '80 happy face generations',
+        'High-resolution outputs',
+        'Pay as you go',
+        'Save 26% per credit'
       ],
       isMostPopular: true,
-      url: 'https://buy.stripe.com/test_eVa3eUdqQ77R7uM288',
-      priceId: 'price_1QoY4OGhn5OuLuumS7oVky1C'
+      url: 'https://buy.stripe.com/test_7sIeXC86w9fZ16o146',
+      priceId: 'price_1QonAYGhn5OuLuumU5gf4xkL'
     }
-    // Add more plans as needed
   ],
   allowFreeTrial: true
 }
