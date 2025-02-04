@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { v4 as uuidv4 } from 'uuid'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
+import cumfaceWorkflow from '@/app/comfyui-workflows/cumface-reactor-api.json'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,8 +22,8 @@ export async function submitHappyFaceJob(
     throw new Error('Insufficient credits');
   }
 
-  // Load the workflow
-  const workflow = JSON.parse(JSON.stringify(require('../comfyui-workflows/cumface-reactor-api.json')));
+  // Load the workflow (create a deep copy to avoid modifying the original)
+  const workflow = JSON.parse(JSON.stringify(cumfaceWorkflow));
   
   if (sourceImageUrl) {
     // Download and upload the source image
