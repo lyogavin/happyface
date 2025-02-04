@@ -235,7 +235,7 @@ export default function EditorPage() {
                 <Button 
                   type="submit" 
                   className="w-full flex items-center justify-center gap-2" 
-                  disabled={isGenerating || !uploadedImage || !isLoaded}
+                  disabled={isGenerating || (!uploadedImage && !prompt) || !isLoaded}
                 >
                   {isGenerating ? "Transforming..." : "Transform to Happy Face"}
                   <div className="flex items-center gap-0.5">
