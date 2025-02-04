@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { v4 as uuidv4 } from 'uuid'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
 import cumfaceWorkflow from '@/app/comfyui-workflows/cumface-reactor-api.json'

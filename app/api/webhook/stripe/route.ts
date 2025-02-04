@@ -62,15 +62,6 @@ export async function POST(req: NextRequest) {
 
         const creditsToAdd = priceConfig.credits;
 
-        // Get current user credits
-        const userQuery = await supabaseClient
-          .from('happyface_users')
-          .select('credits')
-          .eq('clerk_id', userId)
-          .single();
-
-        const currentCredits = userQuery.data?.credits || 0;
-
         // Update user in Clerk
         await clerkClient.users.updateUser(userId, {
           privateMetadata: { stripe_id: stripeId },

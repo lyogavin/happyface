@@ -92,6 +92,7 @@ export default function EditorPage() {
             setTimeout(checkStatus, 1000)
           }
         } catch (error) {
+          console.error('Error checking generation status:', error)
           setIsGenerating(false)
           setError('Failed to check generation status. Please try again.')
           toast({
@@ -166,7 +167,7 @@ export default function EditorPage() {
         <DialogHeader>
           <DialogTitle>Need More Credits</DialogTitle>
           <DialogDescription>
-            You don't have enough credits to generate images. Purchase more credits to continue.
+            You don{"'"}t have enough credits to generate images. Purchase more credits to continue.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
