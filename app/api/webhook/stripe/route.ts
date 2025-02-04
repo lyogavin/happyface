@@ -75,8 +75,8 @@ export async function POST(req: NextRequest) {
             p_credits: creditsToAdd
           });
 
-        if (rpcError || !rpcResult?.success) {
-          console.error('Error adding credits:', rpcError || rpcResult?.error);
+        if (rpcError) {
+          console.error('Error adding credits:', rpcError);
           return NextResponse.json({ error: 'Error adding credits' }, { status: 500 });
         }
       }
