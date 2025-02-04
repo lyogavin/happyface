@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { useUser, useClerk } from "@clerk/nextjs"
 import appConfig from "@/lib/app-config"
 import { useState } from "react"
@@ -15,7 +14,7 @@ const toHumanPrice = (price: number) => {
 export default function PricingSection() {
   const { user, isSignedIn } = useUser()
   const clerk = useClerk()
-  const [interval, setInterval] = useState<Interval>("month")
+  const [interval] = useState<Interval>("month")
   const [isLoading, setIsLoading] = useState(false)
   
   const plan = appConfig.prices[0] // Using the first plan for now
@@ -31,7 +30,6 @@ export default function PricingSection() {
 
     setIsLoading(true)
     try {
-      const priceId = interval === "month" ? plan.monthlyPriceId : plan.yearlyPriceId
       const paymentUrl = `${plan.url}?prefilled_email=${user?.emailAddresses[0]?.emailAddress}&client_reference_id=${user?.id}`
       window.location.href = paymentUrl
     } finally {

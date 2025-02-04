@@ -1,5 +1,5 @@
 "use client"
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ import { User, Settings, LogOut } from "lucide-react"
 import { getUserSubscriptionStatus, getStripePortalSession } from "@/lib/user-utils"
 
 export function ProfileMenu() {
-  const { user, isLoaded } = useUser()
+  const { user } = useUser()
   const clerk = useClerk()
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     status: string
@@ -29,6 +29,7 @@ export function ProfileMenu() {
       getUserSubscriptionStatus(user.id).then((status) => {
         setSubscriptionStatus(status)
       })
+      
       getStripePortalSession(
         (user as any).privateMetadata?.stripe_id,
         user.primaryEmailAddress?.emailAddress ?? ""
