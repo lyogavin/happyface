@@ -35,7 +35,7 @@ export const getStripePortalSession = async (stripe_id: string | null, email: st
 
 export const getUserSubscriptionStatus = async (user_id: string) => {
   // Check if in local development
-  const MOCK_LOCAL = true;
+  const MOCK_LOCAL = false;
   if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
     return { 
       status: 'active',
@@ -44,14 +44,40 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
     };
   }
 
+  console.log("getting user subscription status for ", user_id);
+
   // Get user data from supabase
-  const { data, error } = await supabaseClient
+  const { data: userData, error: userError } = await supabaseClient
     .from('happyface_users')
     .select('stripe_id, credits')
     .eq('clerk_id', user_id);
 
-  // check no rows found
-  if (data  && data.length === 0) {
+  if (userError) {
+    console.error("Error fetching user data:", userError);
+    return { 
+      status: 'inactive',
+      type: 'free',
+      credits: 0
+    };
+  }
+
+  // Get generation count
+  const { count: generationCount, error: countError } = await supabaseClient
+    .from('happyface_generations')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user_id);
+
+  if (countError) {
+    console.error("Error counting generations:", countError);
+    return {
+      status: 'inactive',
+      type: 'free',
+      credits: 0
+    };
+  }
+
+  // check no rows found in userData
+  if (userData && userData.length === 0) {
     // when no rows found, create a new row
     const { error } = await supabaseClient
       .from('happyface_users')
@@ -61,30 +87,25 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
       console.error("Error creating new row for user", user_id, error);
     }
 
+    const remainingCredits = 5 - (generationCount || 0);
+    
     console.log("created new row for user", user_id);
     return {
-      status: 'active',
+      status: remainingCredits > 0 ? 'active' : 'inactive',
       type: 'credits',
-      credits: 5
+      credits: Math.max(0, remainingCredits)
     };
   }
 
-  if (error) {
-    console.error("Error fetching user data:", error);
-    
-    return { 
-      status: 'inactive',
-      type: 'free',
-      credits: 0
-    };
-  }
+  // Calculate remaining credits
+  const remainingCredits = userData[0].credits - (generationCount || 0);
 
-  // Check credits first
-  if (data[0].credits > 0) {
+  // Check credits
+  if (remainingCredits > 0) {
     return {
       status: 'active',
       type: 'credits',
-      credits: data[0].credits
+      credits: remainingCredits
     };
   }
 
@@ -99,7 +120,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
 export const getUserGenerations = async (user_id: string) => {
   const { data, error } = await supabaseClient
     .from('happyface_generations')
-    .select('output_url')
+    .select('generation')
     .eq('user_id', user_id)
     .order('created_at', { ascending: false })
     .limit(20); // Limit to most recent 20 generations
@@ -109,5 +130,5 @@ export const getUserGenerations = async (user_id: string) => {
     return [];
   }
 
-  return data.map(generation => generation.output_url);
+  return data.map(generation => generation.generation);
 };

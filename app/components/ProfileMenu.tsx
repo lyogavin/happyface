@@ -1,5 +1,4 @@
 "use client"
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
@@ -32,8 +31,6 @@ export function ProfileMenu() {
     }
   }, [user])
 
-  const hasAccess = subscriptionStatus.status === 'active'
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -46,18 +43,20 @@ export function ProfileMenu() {
         <DropdownMenuLabel className="text-sm text-muted-foreground">
           {user?.primaryEmailAddress?.emailAddress}
         </DropdownMenuLabel>
+        <DropdownMenuLabel className="text-sm text-muted-foreground">
+          <IconCoin className="inline mr-2 h-4 w-4" />
+          Credits: {subscriptionStatus.credits}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {hasAccess && (
-          <>
-            <DropdownMenuItem asChild>
-              <a href={"/#pricing"}>
-                <IconCoin className="mr-2 h-4 w-4" />
-                <span>Buy Credits</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
+        
+        <DropdownMenuItem asChild>
+          <a href={"/#pricing"}>
+            <IconCoin className="mr-2 h-4 w-4" />
+            <span>Buy Credits</span>
+          </a>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+          
         <DropdownMenuItem onClick={() => clerk.signOut()}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
