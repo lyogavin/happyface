@@ -21,7 +21,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
 import { getUserGenerations } from "@/lib/user-utils"
-
+import posthog from 'posthog-js'
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
   const [prompt, setPrompt] = useState("")
@@ -106,6 +106,7 @@ export default function EditorPage() {
       
       if (error instanceof Error) {
         if (error.message === 'Insufficient credits') {
+          posthog.capture('user_insufficient_credits')
           setShowCreditDialog(true)
           setError('You need more credits to generate images')
         } else {
@@ -171,7 +172,7 @@ export default function EditorPage() {
           <Button
             onClick={() => {
               // TODO: Implement navigation to credits purchase page
-              window.location.href = '/credits'
+              window.location.href = '/#pricing'
             }}
           >
             Purchase Credits

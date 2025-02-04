@@ -13,9 +13,9 @@ import {
 import { User, LogOut } from "lucide-react"
 import { getUserSubscriptionStatus } from "@/lib/user-utils"
 import { IconCoin } from '@tabler/icons-react'
-
+import posthog from 'posthog-js'
 export function ProfileMenu() {
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const clerk = useClerk()
   const [subscriptionStatus, setSubscriptionStatus] = useState<{
     status: string
@@ -24,12 +24,16 @@ export function ProfileMenu() {
   }>({ status: 'inactive', type: 'free', credits: 0 })
 
   useEffect(() => {
-    if (user) {
+    if (user && isLoaded) {
+      posthog.identify(
+        user.id,  // Replace 'distinct_id' with your user's unique identifier
+        { email: user.primaryEmailAddress?.emailAddress, name: user.fullName } // optional: set additional person properties
+      );
       getUserSubscriptionStatus(user.id).then((status) => {
         setSubscriptionStatus(status)
       })
     }
-  }, [user])
+  }, [user, isLoaded])
 
   return (
     <DropdownMenu>
