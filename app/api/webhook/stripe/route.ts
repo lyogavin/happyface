@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         });
 
         // Replace the direct update with RPC call
-        const { data: rpcResult, error: rpcError } = await supabaseClient
+        const { error: rpcError } = await supabaseClient
           .rpc('add_credits', {
             p_clerk_id: userId,
             p_credits: creditsToAdd
