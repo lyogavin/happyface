@@ -11,8 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, LogOut } from "lucide-react"
-import { getUserSubscriptionStatus, getStripePortalSession } from "@/lib/user-utils"
+import { User, LogOut } from "lucide-react"
+import { getUserSubscriptionStatus } from "@/lib/user-utils"
 import { IconCoin } from '@tabler/icons-react'
 
 export function ProfileMenu() {
@@ -23,21 +23,11 @@ export function ProfileMenu() {
     type: string
     credits: number
   }>({ status: 'inactive', type: 'free', credits: 0 })
-  const [paymentPortalUrl, setPaymentPortalUrl] = useState("")
 
   useEffect(() => {
     if (user) {
       getUserSubscriptionStatus(user.id).then((status) => {
         setSubscriptionStatus(status)
-      })
-      
-      getStripePortalSession(
-        (user as any).privateMetadata?.stripe_id,
-        user.primaryEmailAddress?.emailAddress ?? ""
-      ).then((session) => {
-        if (session) {
-          setPaymentPortalUrl(session.url)
-        }
       })
     }
   }, [user])
