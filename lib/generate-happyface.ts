@@ -26,7 +26,7 @@ export async function submitHappyFaceJob(
   const workflow = JSON.parse(JSON.stringify(cumfaceWorkflow));
   
   // Set negative prompt
-  workflow[7].inputs.text = "ugly, organ, dick, musk, cock";
+  workflow[7].inputs.text = "ugly, organ, dick, musk, cock, icecream";
 
   // Set random seed for node 73 (KSampler)
   workflow[73].inputs.seed = Math.floor(Math.random() * 1000000);

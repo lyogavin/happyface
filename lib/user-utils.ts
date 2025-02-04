@@ -60,22 +60,6 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
       credits: 0
     };
   }
-
-  // Get generation count
-  const { count: generationCount, error: countError } = await supabaseClient
-    .from('happyface_generations')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user_id);
-
-  if (countError) {
-    console.error("Error counting generations:", countError);
-    return {
-      status: 'inactive',
-      type: 'free',
-      credits: 0
-    };
-  }
-
   // check no rows found in userData
   if (userData && userData.length === 0) {
     // when no rows found, create a new row
@@ -87,7 +71,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
       console.error("Error creating new row for user", user_id, error);
     }
 
-    const remainingCredits = 5 - (generationCount || 0);
+    const remainingCredits = 5;
     
     console.log("created new row for user", user_id);
     return {
@@ -98,7 +82,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   }
 
   // Calculate remaining credits
-  const remainingCredits = userData[0].credits - (generationCount || 0);
+  const remainingCredits = userData[0].credits;
 
   // Check credits
   if (remainingCredits > 0) {

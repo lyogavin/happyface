@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@supabase/supabase-js"
 import { submitHappyFaceJob, checkHappyFaceStatus } from "@/lib/generate-happyface"
-import { IconCoin, IconRefresh, IconLoader2 } from "@tabler/icons-react"
+import { IconCoin, IconRefresh, IconLoader2, IconDownload } from "@tabler/icons-react"
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,10 @@ import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
 import { getUserGenerations } from "@/lib/user-utils"
 import posthog from 'posthog-js'
+import Link from "next/link"
+import { ProfileMenu } from "@/app/components/ProfileMenu"
+import { CreditsBadge } from "@/app/components/CreditsBadge"
+
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
   const [prompt, setPrompt] = useState("")
@@ -189,10 +193,25 @@ export default function EditorPage() {
   )
 
   return (
+    <>
+    
+    <nav className="bg-white shadow-sm">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <Link href="/" className="text-xl font-bold text-purple-600">
+          Cum Face AI
+        </Link>
+        <div className="flex items-center space-x-4">
+          <CreditsBadge isGenerating={isGenerating}/>
+          <ProfileMenu />
+        </div>
+      </div>
+    </nav>
+        
+        
     <div className="container mx-auto px-4 py-8">
       <CreditPurchaseDialog />
       
-      <h1 className="text-3xl font-bold mb-8 text-center">Happy Face AI Editor</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">Cum Face AI Editor</h1>
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
@@ -212,7 +231,7 @@ export default function EditorPage() {
                     placeholder={
                       uploadedImage
                         ? "Describe how you want to transform the uploaded image..."
-                        : "Describe the happy face you want to generate..."
+                        : "Describe the cum face you want to generate..."
                     }
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -249,10 +268,10 @@ export default function EditorPage() {
                   {isGenerating ? (
                     <>
                       <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
-                      Transforming...
+                      Generating...
                     </>
                   ) : (
-                    "Transform to Happy Face"
+                    "Generate Cum Face"
                   )}
                   <div className="flex items-center gap-0.5">
                     <span className="text-yellow-500">1 x </span>
@@ -277,19 +296,34 @@ export default function EditorPage() {
                       className="rounded-lg shadow-lg"
                     />
                   )}
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="absolute top-2 right-2 rounded-full bg-white/80 hover:bg-white"
-                    onClick={handlePromptSubmit}
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? (
-                      <IconLoader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <IconRefresh className="h-4 w-4" />
-                    )}
-                  </Button>
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="rounded-full bg-white/80 hover:bg-white"
+                      onClick={() => {
+                        if (currentImage) {
+                          window.open(currentImage, '_blank')
+                        }
+                      }}
+                      disabled={isGenerating}
+                    >
+                      <IconDownload className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="rounded-full bg-white/80 hover:bg-white"
+                      onClick={handlePromptSubmit}
+                      disabled={isGenerating}
+                    >
+                      {isGenerating ? (
+                        <IconLoader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <IconRefresh className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center">
@@ -321,7 +355,7 @@ export default function EditorPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {historicalImages.map((img, index) => (
             <Card key={index}>
-              <CardContent className="p-2">
+              <CardContent className="p-2 flex justify-center">
                 <Image
                   src={img || "/placeholder.svg"}
                   alt={`Historical Image ${index + 1}`}
@@ -349,6 +383,7 @@ export default function EditorPage() {
         </Card>
       )}
     </div>
+    </>
   )
 }
 

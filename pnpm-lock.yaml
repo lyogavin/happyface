@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@clerk/backend':
-        specifier: ^1.23.11
-        version: 1.23.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@clerk/nextjs':
         specifier: ^6.11.0
         version: 6.11.0(next@15.1.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
