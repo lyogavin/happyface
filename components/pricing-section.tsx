@@ -24,7 +24,7 @@ export default function PricingSection() {
     setIsLoading(true)
     try {
       const paymentUrl = `${plan.url}?prefilled_email=${user?.emailAddresses[0]?.emailAddress}&client_reference_id=${user?.id}`
-      window.location.href = paymentUrl
+      window.open(paymentUrl, '_blank')
     } finally {
       setIsLoading(false)
     }

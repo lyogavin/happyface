@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User, Settings, LogOut } from "lucide-react"
 import { getUserSubscriptionStatus, getStripePortalSession } from "@/lib/user-utils"
+import { IconCoin } from '@tabler/icons-react'
 
 export function ProfileMenu() {
   const { user } = useUser()
@@ -59,9 +60,9 @@ export function ProfileMenu() {
         {hasAccess && (
           <>
             <DropdownMenuItem asChild>
-              <a href={paymentPortalUrl}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Manage Subscription</span>
+              <a href={"/#pricing"}>
+                <IconCoin className="mr-2 h-4 w-4" />
+                <span>Buy Credits</span>
               </a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
