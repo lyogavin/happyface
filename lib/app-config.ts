@@ -15,8 +15,8 @@ export const appConfig = {
         'Pay as you go'
       ],
       isMostPopular: false,
-      url: 'https://buy.stripe.com/test_4gwbLqgD22RBaGY9AB',
-      priceId: 'price_1Qon9ZGhn5OuLuumwtgZ10q4'
+      url: 'https://buy.stripe.com/28o1444Nx05DanS145',
+      priceId: 'price_1QoozhK1azW3oEWADjbBgKgx'
     },
     {
       id: 'credits-80',
@@ -31,8 +31,8 @@ export const appConfig = {
         'Save 26% per credit'
       ],
       isMostPopular: true,
-      url: 'https://buy.stripe.com/test_7sIeXC86w9fZ16o146',
-      priceId: 'price_1QonAYGhn5OuLuumU5gf4xkL'
+      url: 'https://buy.stripe.com/cN24gg6VF3hPfIc000',
+      priceId: 'price_1QoozhK1azW3oEWABQ3VUYhS'
     }
   ],
   allowFreeTrial: true
