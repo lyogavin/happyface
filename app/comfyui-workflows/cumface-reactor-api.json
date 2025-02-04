@@ -195,5 +195,18 @@
     "_meta": {
       "title": "Load LoRA"
     }
+  },
+  "231": {
+    "inputs": {
+      "filename_prefix": "happyface",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
   }
 }

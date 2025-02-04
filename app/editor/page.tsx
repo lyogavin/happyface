@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@supabase/supabase-js"
 import { submitHappyFaceJob, checkHappyFaceStatus } from "@/lib/generate-happyface"
-import { IconCoin } from "@tabler/icons-react"
+import { IconCoin, IconRefresh, IconLoader2 } from "@tabler/icons-react"
 import {
   Dialog,
   DialogContent,
@@ -62,9 +62,6 @@ export default function EditorPage() {
     setError(null)
 
     try {
-      if (!uploadedImage) {
-        throw new Error('An image is required for transformation')
-      }
 
       // Get the current user ID (you'll need to implement this)
       const userId = user?.id // TODO: Get actual user ID from your auth system
@@ -75,7 +72,7 @@ export default function EditorPage() {
       // Poll for results
       const checkStatus = async () => {
         try {
-          const result = await checkHappyFaceStatus(jobId)
+          const result = await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)
           
           if (result.status === 'completed' && result.url) {
             setCurrentImage(result.url)
@@ -112,10 +109,10 @@ export default function EditorPage() {
           setShowCreditDialog(true)
           setError('You need more credits to generate images')
         } else {
-          setError(error.message)
+          setError("Error generating image, please try again.")
           toast({
             title: "Error",
-            description: error.message,
+            description: "Error generating image, please try again.",
             variant: "destructive",
           })
         }
@@ -231,13 +228,31 @@ export default function EditorPage() {
                     onChange={handleImageUpload}
                     className="w-full"
                   />
+                  {uploadedImage && (
+                    <div className="mt-2">
+                      <Image
+                        src={uploadedImage}
+                        alt="Uploaded preview"
+                        width={100}
+                        height={100}
+                        className="rounded-lg object-cover"
+                      />
+                    </div>
+                  )}
                 </div>
                 <Button 
                   type="submit" 
                   className="w-full flex items-center justify-center gap-2" 
                   disabled={isGenerating || (!uploadedImage && !prompt) || !isLoaded}
                 >
-                  {isGenerating ? "Transforming..." : "Transform to Happy Face"}
+                  {isGenerating ? (
+                    <>
+                      <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
+                      Transforming...
+                    </>
+                  ) : (
+                    "Transform to Happy Face"
+                  )}
                   <div className="flex items-center gap-0.5">
                     <span className="text-yellow-500">1 x </span>
                     <IconCoin className="h-4 w-4 text-yellow-500" />
@@ -247,23 +262,52 @@ export default function EditorPage() {
             </div>
             <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
               {currentImage ? (
-                <Image
-                  src={currentImage}
-                  alt="Generated Happy Face"
-                  width={512}
-                  height={512}
-                  className="rounded-lg shadow-lg"
-                />
+                <div className="relative">
+                  {isGenerating ? (
+                    <div className="w-[512px] h-[512px] rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                      <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
+                    </div>
+                  ) : (
+                    <Image
+                      src={currentImage}
+                      alt="Generated Happy Face"
+                      width={512}
+                      height={512}
+                      className="rounded-lg shadow-lg"
+                    />
+                  )}
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute top-2 right-2 rounded-full bg-white/80 hover:bg-white"
+                    onClick={handlePromptSubmit}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <IconLoader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <IconRefresh className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-gray-500 mb-4">Your generated image will appear here</p>
-                  <Image
-                    src="/placeholder.svg?height=200&width=200&text=Happy Face"
-                    alt="Placeholder"
-                    width={200}
-                    height={200}
-                    className="mx-auto opacity-50"
-                  />
+                  {isGenerating ? (
+                    <div className="w-[512px] h-[512px] rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                      <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-500 mb-4">Your generated image will appear here</p>
+                      <Image
+                        src="/placeholder.svg?height=200&width=200&text=Happy Face"
+                        alt="Placeholder"
+                        width={200}
+                        height={200}
+                        className="mx-auto opacity-50"
+                      />
+                    </>
+                  )}
                 </div>
               )}
             </div>

@@ -1,3 +1,4 @@
+'use server'
 import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
@@ -5,7 +6,7 @@ import cumfaceWorkflow from '@/app/comfyui-workflows/cumface-reactor-api.json'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_SECRET!
 )
 
 const COMFY_API_HOST = appConfig.comfyuiHost;
@@ -24,6 +25,12 @@ export async function submitHappyFaceJob(
   // Load the workflow (create a deep copy to avoid modifying the original)
   const workflow = JSON.parse(JSON.stringify(cumfaceWorkflow));
   
+  // Set negative prompt
+  workflow[7].inputs.text = "ugly, organ, dick, musk, cock";
+
+  // Set random seed for node 73 (KSampler)
+  workflow[73].inputs.seed = Math.floor(Math.random() * 1000000);
+
   if (sourceImageUrl) {
     // Download and upload the source image
     const sourceImage = await downloadImage(sourceImageUrl);
@@ -68,7 +75,7 @@ export async function submitHappyFaceJob(
   return data.prompt_id;
 }
 
-export async function checkHappyFaceStatus(jobId: string): Promise<ComfyUIProgress> {
+export async function checkHappyFaceStatus(jobId: string, userId: string, sourceImageUrl: string | null, prompt: string): Promise<ComfyUIProgress> {
   const response = await fetch(`${COMFY_API_HOST}/history/${jobId}`);
   
   if (!response.ok) {
@@ -77,9 +84,9 @@ export async function checkHappyFaceStatus(jobId: string): Promise<ComfyUIProgre
 
   const data = await response.json();
   
-  // Check if job is completed - node 226 is the PreviewImage node
-  if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[226]?.images?.[0]) {
-    const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[226].images[0].filename}`;
+  // Check if job is completed - node 231 is now the SaveImage node
+  if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[231]?.images?.[0]) {
+    const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[231].images[0].filename}`;
     
     // Download the image from ComfyUI
     const imageData = await downloadImage(comfyUrl);
@@ -103,6 +110,17 @@ export async function checkHappyFaceStatus(jobId: string): Promise<ComfyUIProgre
     const { data: { publicUrl } } = supabase.storage
       .from('images')
       .getPublicUrl(filePath);
+
+    // call supabase rpc handle_happyface_generation to save result and decrease credits
+    const { error: rpcError } = await supabase.rpc('handle_happyface_generation', {
+      p_user_id: userId,
+      p_source_image_url: sourceImageUrl,
+      p_prompt: prompt,
+      p_result_image_url: publicUrl
+    });
+    if (rpcError) {
+      throw new Error('Failed to handle happyface generation: ' + rpcError.message);
+    }
 
     return {
       status: 'completed',

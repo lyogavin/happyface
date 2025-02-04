@@ -35,7 +35,7 @@ export const getStripePortalSession = async (stripe_id: string | null, email: st
 
 export const getUserSubscriptionStatus = async (user_id: string) => {
   // Check if in local development
-  const MOCK_LOCAL = false;
+  const MOCK_LOCAL = true;
   if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
     return { 
       status: 'active',
