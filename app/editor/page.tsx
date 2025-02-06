@@ -25,7 +25,7 @@ import posthog from 'posthog-js'
 import Link from "next/link"
 import { ProfileMenu } from "@/app/components/ProfileMenu"
 import { CreditsBadge } from "@/app/components/CreditsBadge"
-
+import TrackDeskTrackClick from "@/components/track-desk-track-click"
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
   const [prompt, setPrompt] = useState("")
@@ -383,6 +383,7 @@ export default function EditorPage() {
         </Card>
       )}
     </div>
+    <TrackDeskTrackClick />
     </>
   )
 }

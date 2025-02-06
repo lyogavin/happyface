@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity } from "@tabler/icons-react"
 import PricingSection from "@/components/pricing-section"
-
+import TrackDeskTrackClick from "@/components/track-desk-track-click"
 export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -187,6 +187,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      <TrackDeskTrackClick />
     </div>
   )
 }
