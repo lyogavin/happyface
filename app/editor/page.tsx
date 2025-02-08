@@ -122,6 +122,7 @@ export default function EditorPage() {
             variant: "destructive",
           })
           posthog.capture('generation_error', {'error': error})
+        }
       }
     }
   }
