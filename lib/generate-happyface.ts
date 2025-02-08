@@ -2,7 +2,8 @@
 import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
-import cumfaceWorkflow from '@/app/comfyui-workflows/cumface-reactor-api.json'
+import cumfaceIpadapterWorkflow from '@/app/comfyui-workflows/cumface-ipadpt-api.json'
+import cumfaceNoIpadapterWorkflow from '@/app/comfyui-workflows/cumface-noipadpt-api.json'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,10 +24,10 @@ export async function submitHappyFaceJob(
   }
 
   // Load the workflow (create a deep copy to avoid modifying the original)
-  const workflow = JSON.parse(JSON.stringify(cumfaceWorkflow));
+  const workflow = JSON.parse(JSON.stringify(sourceImageUrl ? cumfaceIpadapterWorkflow : cumfaceNoIpadapterWorkflow));
   
   // Set negative prompt
-  workflow[7].inputs.text = "ugly, organ, dick, musk, cock, icecream";
+  workflow[7].inputs.text = "ugly, organ, dick, cock, multiple person";
 
   // Set random seed for node 73 (KSampler)
   workflow[73].inputs.seed = Math.floor(Math.random() * 1000000);
@@ -36,23 +37,20 @@ export async function submitHappyFaceJob(
     const sourceImage = await downloadImage(sourceImageUrl);
     const sourceName = await uploadImage(sourceImage);
     workflow[221].inputs.image = sourceName;
-  } else {
-    // If no source image, set weight to 0
-    workflow[206].inputs.weight = 0;
-  }
+  } 
 
   // Set prompt if provided
   if (prompt) {
     let mergedPrompt = prompt;
-    if (!prompt.startsWith("white cum on face")) {
-      mergedPrompt = "white cum on face, " + prompt;
+    if (!prompt.startsWith("cum on face")) {
+      mergedPrompt = "cum on face, " + prompt;
     }
-    if (!prompt.endsWith("white cum on face")) {
-      mergedPrompt = prompt + ", white cum on face";
+    if (!prompt.endsWith("orgasm, cum on face")) {
+      mergedPrompt = prompt + ", orgasm, cum on face";
     }
     workflow[190].inputs.text = mergedPrompt;
   } else {
-    workflow[190].inputs.text = "white cum on face";
+    workflow[190].inputs.text = "orgasm, cum on face";
   }
 
   // Submit the job to ComfyUI

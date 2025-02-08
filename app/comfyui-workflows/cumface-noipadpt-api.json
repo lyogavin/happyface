@@ -12,7 +12,7 @@
     "inputs": {
       "text": "ugly, organ, dick, multiple person",
       "clip": [
-        "233",
+        "227",
         1
       ]
     },
@@ -39,14 +39,14 @@
   },
   "73": {
     "inputs": {
-      "seed": 228785189854258,
-      "steps": 20,
-      "cfg": 7,
-      "sampler_name": "euler_ancestral",
-      "scheduler": "normal",
-      "denoise": 0.5,
+      "seed": 936387217814203,
+      "steps": 30,
+      "cfg": 7.95,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1,
       "model": [
-        "206",
+        "227",
         0
       ],
       "positive": [
@@ -69,89 +69,15 @@
   },
   "190": {
     "inputs": {
-      "text": "cum on face, facing camera wearing dress, orgasm, cum on face\n\n",
+      "text": "cum on face, asian girl, orgasm, cum on face, colorful\n\n",
       "clip": [
-        "233",
+        "227",
         1
       ]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
       "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "204": {
-    "inputs": {
-      "lora_name": "ip-adapter-faceid-plusv2_sdxl_lora.safetensors",
-      "strength_model": 0.5,
-      "model": [
-        "4",
-        0
-      ]
-    },
-    "class_type": "LoraLoaderModelOnly",
-    "_meta": {
-      "title": "LoraLoaderModelOnly"
-    }
-  },
-  "206": {
-    "inputs": {
-      "weight": 0.92,
-      "weight_type": "style transfer",
-      "combine_embeds": "concat",
-      "start_at": 0.116,
-      "end_at": 1,
-      "embeds_scaling": "V only",
-      "model": [
-        "207",
-        0
-      ],
-      "ipadapter": [
-        "207",
-        1
-      ],
-      "image": [
-        "221",
-        0
-      ]
-    },
-    "class_type": "IPAdapterAdvanced",
-    "_meta": {
-      "title": "IPAdapter Advanced"
-    }
-  },
-  "207": {
-    "inputs": {
-      "preset": "PLUS FACE (portraits)",
-      "model": [
-        "233",
-        0
-      ]
-    },
-    "class_type": "IPAdapterUnifiedLoader",
-    "_meta": {
-      "title": "IPAdapter Unified Loader"
-    }
-  },
-  "214": {
-    "inputs": {
-      "rgthree_comparer": {
-        "images": []
-      }
-    },
-    "class_type": "Image Comparer (rgthree)",
-    "_meta": {
-      "title": "Image Comparer (rgthree)"
-    }
-  },
-  "221": {
-    "inputs": {
-      "image": "33b77b08-922d-4ac2-b3a3-779a499dc9ec.webp",
-      "upload": "image"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "Load Image"
     }
   },
   "225": {
@@ -180,14 +106,14 @@
   "227": {
     "inputs": {
       "lora_name": "JustCum.safetensors",
-      "strength_model": 0.84,
-      "strength_clip": 0.86,
+      "strength_model": 0.8200000000000001,
+      "strength_clip": 1,
       "model": [
-        "4",
+        "233",
         0
       ],
       "clip": [
-        "4",
+        "233",
         1
       ]
     },
@@ -213,13 +139,13 @@
     "inputs": {
       "lora_name": "orgasmface_SDXL.safetensors",
       "strength_model": 0.25,
-      "strength_clip": 0.24,
+      "strength_clip": 0.5700000000000001,
       "model": [
-        "227",
+        "4",
         0
       ],
       "clip": [
-        "227",
+        "4",
         1
       ]
     },

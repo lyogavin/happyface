@@ -39,12 +39,12 @@
   },
   "73": {
     "inputs": {
-      "seed": 228785189854258,
-      "steps": 20,
-      "cfg": 7,
-      "sampler_name": "euler_ancestral",
-      "scheduler": "normal",
-      "denoise": 0.5,
+      "seed": 14,
+      "steps": 30,
+      "cfg": 7.95,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1,
       "model": [
         "206",
         0
@@ -146,7 +146,7 @@
   },
   "221": {
     "inputs": {
-      "image": "33b77b08-922d-4ac2-b3a3-779a499dc9ec.webp",
+      "image": "5ec1cc5b-6a8e-4857-88a5-59d1e9b85dee.webp",
       "upload": "image"
     },
     "class_type": "LoadImage",

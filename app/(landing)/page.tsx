@@ -3,9 +3,11 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity } from "@tabler/icons-react"
 import PricingSection from "@/components/pricing-section"
+import { GetCreditsButton } from "@/components/get-credits-button"
+
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[100dvh]">
       <header className="w-full py-6 px-4 sm:px-6 lg:px-8 bg-white border-b">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold text-primary flex items-center gap-2">
@@ -28,12 +30,7 @@ export default function LandingPage() {
               Buy Credits
             </Link>
           </nav>
-          <Button asChild>
-            <Link href="/editor" className="flex items-center gap-2">
-              <IconCoin className="w-4 h-4 text-yellow-400" />
-              Get Free Credits
-            </Link>
-          </Button>
+          <GetCreditsButton />
         </div>
       </header>
 

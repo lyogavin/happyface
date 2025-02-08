@@ -224,7 +224,7 @@ export default function EditorPage() {
             <div className="space-y-6">
               <form onSubmit={handlePromptSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="prompt">Enter your prompt</Label>
+                  <Label htmlFor="prompt">Enter your prompt (optional)</Label>
                   <Textarea
                     id="prompt"
                     placeholder={
@@ -281,9 +281,9 @@ export default function EditorPage() {
             </div>
             <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
               {currentImage ? (
-                <div className="relative">
+                <div className="relative w-full max-w-[512px]">
                   {isGenerating ? (
-                    <div className="w-[512px] h-[512px] rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                    <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
                       <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
                     </div>
                   ) : (
@@ -292,7 +292,7 @@ export default function EditorPage() {
                       alt="Generated Happy Face"
                       width={512}
                       height={512}
-                      className="rounded-lg shadow-lg"
+                      className="rounded-lg shadow-lg w-full h-auto"
                     />
                   )}
                   <div className="absolute top-2 right-2 flex gap-2">
@@ -325,9 +325,9 @@ export default function EditorPage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center">
+                <div className="text-center w-full max-w-[512px]">
                   {isGenerating ? (
-                    <div className="w-[512px] h-[512px] rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                    <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
                       <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
                     </div>
                   ) : (
@@ -355,13 +355,14 @@ export default function EditorPage() {
           {historicalImages.map((img, index) => (
             <Card key={index}>
               <CardContent className="p-2 flex justify-center">
-                <Image
-                  src={img || "/placeholder.svg"}
-                  alt={`Historical Image ${index + 1}`}
-                  width={250}
-                  height={250}
-                  className="rounded-lg"
-                />
+                <div className="relative w-full aspect-square">
+                  <Image
+                    src={img || "/placeholder.svg"}
+                    alt={`Historical Image ${index + 1}`}
+                    fill
+                    className="rounded-lg object-cover"
+                  />
+                </div>
               </CardContent>
             </Card>
           ))}
