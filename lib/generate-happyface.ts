@@ -2,8 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
-import cumfaceIpadapterWorkflow from '@/app/comfyui-workflows/cumface-ipadpt-api.json'
-import cumfaceNoIpadapterWorkflow from '@/app/comfyui-workflows/cumface-noipadpt-api.json'
+import cumfaceInstidIpadapterWorkflow from '@/app/comfyui-workflows/cumface-instid-ipadpt-api.json'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,7 +23,7 @@ export async function submitHappyFaceJob(
   }
 
   // Load the workflow (create a deep copy to avoid modifying the original)
-  const workflow = JSON.parse(JSON.stringify(sourceImageUrl ? cumfaceIpadapterWorkflow : cumfaceNoIpadapterWorkflow));
+  const workflow = JSON.parse(JSON.stringify(cumfaceInstidIpadapterWorkflow));
   
   // Set negative prompt
   workflow[7].inputs.text = "ugly, organ, dick, cock, multiple person";
@@ -37,7 +36,11 @@ export async function submitHappyFaceJob(
     const sourceImage = await downloadImage(sourceImageUrl);
     const sourceName = await uploadImage(sourceImage);
     workflow[221].inputs.image = sourceName;
-  } 
+  } else {
+    // If no source image, set weight to 0
+    workflow[206].inputs.weight = 0;
+    workflow[237].inputs.weight = 0;
+  }
 
   // Set prompt if provided
   if (prompt) {
