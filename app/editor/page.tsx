@@ -86,6 +86,7 @@ export default function EditorPage() {
               description: "Your happy face has been generated.",
             })
           } else if (result.status === 'error') {
+            posthog.capture('generation_error', {'error': result})
             throw new Error('Failed to generate image')
           } else {
             // Continue polling if still processing
@@ -100,6 +101,7 @@ export default function EditorPage() {
             description: "Failed to check generation status. Please try again.",
             variant: "destructive",
           })
+          posthog.capture('generation_error', {'error': error})
         }
       }
 
@@ -119,7 +121,7 @@ export default function EditorPage() {
             description: "Error generating image, please try again.",
             variant: "destructive",
           })
-        }
+          posthog.capture('generation_error', {'error': error})
       }
     }
   }
