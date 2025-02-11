@@ -155,6 +155,28 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Featured On Section */}
+        <section className="py-12 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-extrabold text-center mb-8">Featured On</h2>
+            <div className="flex justify-center">
+              <a 
+                id="verification-aitoolhunt" 
+                data-verify-aitoolhunt="102606411717093946378" 
+                href="https://www.aitoolhunt.com/tool/cumfaceai.com?utm_medium=featured&utm_source=cumfaceai.com" 
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img 
+                  width="224" 
+                  src="https://www.aitoolhunt.com/images/featured-light.png?a=1" 
+                  alt="Featured on AI Tool Hunt"
+                />
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Pricing Section */}
         <PricingSection />
       </main>
