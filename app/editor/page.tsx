@@ -88,6 +88,14 @@ export default function EditorPage() {
         orgasmStrength
       )
 
+      if (jobId === 'Insufficient credits') {
+        posthog.capture('user_insufficient_credits')
+        setShowCreditDialog(true)
+        setError('You need more credits to generate images')
+        setIsGenerating(false)
+        return
+      }
+
       const checkStatus = async () => {
         try {
           const result = await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)

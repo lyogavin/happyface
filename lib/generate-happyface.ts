@@ -21,7 +21,7 @@ export async function submitHappyFaceJob(
   // Check user subscription status first
   const subscription = await getUserSubscriptionStatus(userId);
   if (!subscription || subscription.credits < 1) {
-    throw new Error('Insufficient credits');
+    return 'Insufficient credits';
   }
 
   // Load the workflow (create a deep copy to avoid modifying the original)
