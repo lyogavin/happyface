@@ -8,7 +8,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_SECRET!
 )
-export const maxDuration = 290;
 
 const COMFY_API_HOST = appConfig.comfyuiHost;
 
