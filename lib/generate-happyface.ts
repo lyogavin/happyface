@@ -24,6 +24,8 @@ export async function submitHappyFaceJob(
     return 'Insufficient credits';
   }
 
+  console.log('cumStrength', cumStrength, 'orgasmStrength', orgasmStrength);
+
   // Load the workflow (create a deep copy to avoid modifying the original)
   const workflow = JSON.parse(JSON.stringify(cumfaceWorkflow));
   
