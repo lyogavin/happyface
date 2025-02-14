@@ -47,6 +47,8 @@ export default function EditorPage() {
   const [orgasmStrength, setOrgasmStrength] = useState(1.0)
   const [progress, setProgress] = useState(0)
 
+  const showAdvancedSettings = false;
+
   // Add useEffect to load historical generations
   useEffect(() => {
     const loadHistoricalGenerations = async () => {
@@ -294,9 +296,10 @@ export default function EditorPage() {
                     )}
                   </div>
 
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="settings">
-                      <AccordionTrigger>Advanced Settings</AccordionTrigger>
+                  {showAdvancedSettings && (
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="settings">
+                        <AccordionTrigger>Advanced Settings</AccordionTrigger>
                       <AccordionContent>
                         <div className="space-y-6">
                           <div className="space-y-2">
@@ -325,6 +328,7 @@ export default function EditorPage() {
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>
+                  )}
 
                   <Button 
                     type="submit" 

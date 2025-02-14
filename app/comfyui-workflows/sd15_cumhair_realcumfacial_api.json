@@ -10,9 +10,9 @@
   },
   "7": {
     "inputs": {
-      "text": "ugly, organ, dick, cock, multiple person",
+      "text": "ugly, organ, dick, multiple person",
       "clip": [
-        "241",
+        "233",
         1
       ]
     },
@@ -39,9 +39,9 @@
   },
   "73": {
     "inputs": {
-      "seed": 420418620024455,
+      "seed": 650686568805578,
       "steps": 30,
-      "cfg": 7.890000000000001,
+      "cfg": 7.7,
       "sampler_name": "dpmpp_2m",
       "scheduler": "karras",
       "denoise": 1,
@@ -50,12 +50,12 @@
         0
       ],
       "positive": [
-        "237",
-        1
+        "190",
+        0
       ],
       "negative": [
-        "237",
-        2
+        "7",
+        0
       ],
       "latent_image": [
         "225",
@@ -69,9 +69,9 @@
   },
   "190": {
     "inputs": {
-      "text": "cum on face, woman, orgasm, cum on her face\n",
+      "text": "cum on her face, facing camera wearing dress, orgasm, white cum on face\n",
       "clip": [
-        "241",
+        "233",
         1
       ]
     },
@@ -82,7 +82,7 @@
   },
   "206": {
     "inputs": {
-      "weight": 0.97,
+      "weight": 0.9400000000000001,
       "weight_type": "linear",
       "combine_embeds": "concat",
       "start_at": 0,
@@ -108,9 +108,9 @@
   },
   "207": {
     "inputs": {
-      "preset": "STANDARD (medium strength)",
+      "preset": "FULL FACE - SD1.5 only (portraits stronger)",
       "model": [
-        "237",
+        "227",
         0
       ]
     },
@@ -119,9 +119,20 @@
       "title": "IPAdapter Unified Loader"
     }
   },
+  "214": {
+    "inputs": {
+      "rgthree_comparer": {
+        "images": []
+      }
+    },
+    "class_type": "Image Comparer (rgthree)",
+    "_meta": {
+      "title": "Image Comparer (rgthree)"
+    }
+  },
   "221": {
     "inputs": {
-      "image": "3fe315e7-7ef1-430a-949f-822fd173a3f1.webp",
+      "image": "33b77b08-922d-4ac2-b3a3-779a499dc9ec.webp",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -131,8 +142,8 @@
   },
   "225": {
     "inputs": {
-      "width": 1024,
-      "height": 1024,
+      "width": 512,
+      "height": 512,
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -152,77 +163,11 @@
       "title": "Preview Image"
     }
   },
-  "236": {
+  "227": {
     "inputs": {
-      "instantid_file": "SDXL/ip-adapter.bin"
-    },
-    "class_type": "InstantIDModelLoader",
-    "_meta": {
-      "title": "Load InstantID Model"
-    }
-  },
-  "237": {
-    "inputs": {
-      "weight": 0.88,
-      "start_at": 0,
-      "end_at": 1,
-      "instantid": [
-        "236",
-        0
-      ],
-      "insightface": [
-        "238",
-        0
-      ],
-      "control_net": [
-        "239",
-        0
-      ],
-      "image": [
-        "221",
-        0
-      ],
-      "model": [
-        "241",
-        0
-      ],
-      "positive": [
-        "190",
-        0
-      ],
-      "negative": [
-        "7",
-        0
-      ]
-    },
-    "class_type": "ApplyInstantID",
-    "_meta": {
-      "title": "ZenID FaceSwap"
-    }
-  },
-  "238": {
-    "inputs": {
-      "provider": "CUDA"
-    },
-    "class_type": "InstantIDFaceAnalysis",
-    "_meta": {
-      "title": "InstantID Face Analysis"
-    }
-  },
-  "239": {
-    "inputs": {
-      "control_net_name": "SDXL/instantid/diffusion_pytorch_model.safetensors"
-    },
-    "class_type": "ControlNetLoader",
-    "_meta": {
-      "title": "Load ControlNet Model"
-    }
-  },
-  "240": {
-    "inputs": {
-      "lora_name": "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
-      "strength_model": 1,
-      "strength_clip": 1,
+      "lora_name": "real_cum_facial.safetensors",
+      "strength_model": 1.29,
+      "strength_clip": 1.26,
       "model": [
         "4",
         0
@@ -237,28 +182,9 @@
       "title": "Load LoRA"
     }
   },
-  "241": {
+  "231": {
     "inputs": {
-      "lora_name": "orgasmface_SDXL.safetensors",
-      "strength_model": 1,
-      "strength_clip": 1,
-      "model": [
-        "240",
-        0
-      ],
-      "clip": [
-        "240",
-        1
-      ]
-    },
-    "class_type": "LoraLoader",
-    "_meta": {
-      "title": "Load LoRA"
-    }
-  },
-  "242": {
-    "inputs": {
-      "filename_prefix": "ComfyUI",
+      "filename_prefix": "happyface",
       "images": [
         "8",
         0
@@ -267,6 +193,25 @@
     "class_type": "SaveImage",
     "_meta": {
       "title": "Save Image"
+    }
+  },
+  "233": {
+    "inputs": {
+      "lora_name": "Cumhair.safetensors",
+      "strength_model": 1.02,
+      "strength_clip": 1.06,
+      "model": [
+        "227",
+        0
+      ],
+      "clip": [
+        "227",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
     }
   }
 }
