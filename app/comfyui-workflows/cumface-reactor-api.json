@@ -1,7 +1,7 @@
 {
   "4": {
     "inputs": {
-      "ckpt_name": "realisticVisionV60B1_v51HyperVAE.safetensors"
+      "ckpt_name": "Hard Muscle - Vanilla V3.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
@@ -10,9 +10,9 @@
   },
   "7": {
     "inputs": {
-      "text": "ugly, organ, dick",
+      "text": "ugly, organ, dick, multiple person",
       "clip": [
-        "227",
+        "233",
         1
       ]
     },
@@ -39,12 +39,12 @@
   },
   "73": {
     "inputs": {
-      "seed": 50,
-      "steps": 25,
+      "seed": 228785189854258,
+      "steps": 20,
       "cfg": 7,
-      "sampler_name": "dpmpp_2m_sde",
-      "scheduler": "karras",
-      "denoise": 1,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 0.5,
       "model": [
         "206",
         0
@@ -69,9 +69,9 @@
   },
   "190": {
     "inputs": {
-      "text": "white cum on face, a blonde women with facing camera wearing dress, white cum on face\n\n",
+      "text": "cum on face, facing camera wearing dress, orgasm, cum on face\n\n",
       "clip": [
-        "227",
+        "233",
         1
       ]
     },
@@ -96,10 +96,10 @@
   },
   "206": {
     "inputs": {
-      "weight": 1,
-      "weight_type": "ease in",
+      "weight": 0.92,
+      "weight_type": "style transfer",
       "combine_embeds": "concat",
-      "start_at": 0,
+      "start_at": 0.116,
       "end_at": 1,
       "embeds_scaling": "V only",
       "model": [
@@ -124,7 +124,7 @@
     "inputs": {
       "preset": "PLUS FACE (portraits)",
       "model": [
-        "227",
+        "233",
         0
       ]
     },
@@ -146,7 +146,7 @@
   },
   "221": {
     "inputs": {
-      "image": "rayz_model0.png",
+      "image": "33b77b08-922d-4ac2-b3a3-779a499dc9ec.webp",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -156,8 +156,8 @@
   },
   "225": {
     "inputs": {
-      "width": 512,
-      "height": 512,
+      "width": 1024,
+      "height": 1024,
       "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
@@ -180,8 +180,8 @@
   "227": {
     "inputs": {
       "lora_name": "JustCum.safetensors",
-      "strength_model": 1,
-      "strength_clip": 1,
+      "strength_model": 0.84,
+      "strength_clip": 0.86,
       "model": [
         "4",
         0
@@ -207,6 +207,25 @@
     "class_type": "SaveImage",
     "_meta": {
       "title": "Save Image"
+    }
+  },
+  "233": {
+    "inputs": {
+      "lora_name": "orgasmface_SDXL.safetensors",
+      "strength_model": 0.25,
+      "strength_clip": 0.24,
+      "model": [
+        "227",
+        0
+      ],
+      "clip": [
+        "227",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
     }
   }
 }

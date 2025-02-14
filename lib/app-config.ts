@@ -1,7 +1,7 @@
 export const appConfig = {
   appName: 'HappyFaceAI.com',
   name: 'Happy Face AI',
-  comfyuiHost: 'http://125.136.64.90:40657',
+  comfyuiHost: 'http://45.18.173.26:41040',
   prices: [
     {
       id: 'credits-30',

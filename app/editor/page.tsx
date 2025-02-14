@@ -18,13 +18,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-/*import {
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Slider } from "@/components/ui/slider"*/
+import { Slider } from "@/components/ui/slider"
 import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
 import { getUserGenerations } from "@/lib/user-utils"
@@ -46,12 +46,6 @@ export default function EditorPage() {
   const [cumStrength, setCumStrength] = useState(1.0)
   const [orgasmStrength, setOrgasmStrength] = useState(1.0)
   const [progress, setProgress] = useState(0)
-
-  useEffect(() => {
-    setCumStrength(1.0)
-    setOrgasmStrength(1.0)
-    console.log('cumStrength', cumStrength, 'orgasmStrength', orgasmStrength)
-  }, [cumStrength, orgasmStrength])
 
   // Add useEffect to load historical generations
   useEffect(() => {
@@ -300,7 +294,7 @@ export default function EditorPage() {
                     )}
                   </div>
 
-                  {/*<Accordion type="single" collapsible className="w-full">
+                  <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="settings">
                       <AccordionTrigger>Advanced Settings</AccordionTrigger>
                       <AccordionContent>
@@ -330,7 +324,7 @@ export default function EditorPage() {
                         </div>
                       </AccordionContent>
                     </AccordionItem>
-                  </Accordion>*/}
+                  </Accordion>
 
                   <Button 
                     type="submit" 
