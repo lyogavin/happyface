@@ -27,6 +27,8 @@ export async function submitHappyFaceJob(
   // Load the workflow (create a deep copy to avoid modifying the original)
   const workflow = JSON.parse(JSON.stringify(comfyuiWorkflow));
   
+  console.log('cumStrength', cumStrength);
+  console.log('orgasmStrength', orgasmStrength);
   // Set dimensions to 512x512
   //workflow[225].inputs.width = 512;
   //workflow[225].inputs.height = 512;
