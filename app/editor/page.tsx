@@ -313,7 +313,7 @@ export default function EditorPage() {
                             <Slider
                               id="cum-strength"
                               min={0}
-                              max={1}
+                              max={1.5}
                               step={0.1}
                               value={[cumStrength]}
                               onValueChange={(value) => setCumStrength(value[0])}
@@ -324,7 +324,7 @@ export default function EditorPage() {
                             <Slider
                               id="orgasm-strength"
                               min={0}
-                              max={1}
+                              max={1.5}
                               step={0.1}
                               value={[orgasmStrength]}
                               onValueChange={(value) => setOrgasmStrength(value[0])}
