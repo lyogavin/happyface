@@ -172,7 +172,7 @@ export default function EditorPage() {
         const fileName = `${Math.random()}.${fileExt}`
         const filePath = `happyface_upload/${fileName}`
 
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from('images')
           .upload(filePath, file)
 

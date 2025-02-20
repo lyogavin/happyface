@@ -167,8 +167,9 @@ export default function LandingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img 
-                  width="224" 
+                <Image 
+                  width={224}
+                  height={50}
                   src="https://www.aitoolhunt.com/images/featured-light.png?a=1" 
                   alt="Featured on AI Tool Hunt"
                 />
