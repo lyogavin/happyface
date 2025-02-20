@@ -80,6 +80,14 @@ export default function EditorPage() {
     try {
       const userId = user?.id
 
+      posthog.capture('generation_started', {
+        'user_id': userId,
+        'prompt': prompt,
+        'cum_strength': cumStrength,
+        'orgasm_strength': orgasmStrength,
+        'uploaded_image': uploadedImage
+      })
+
       const jobId = await submitHappyFaceJob(
         userId || '', 
         uploadedImage, 

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
 import cumfaceInstidIpadapterWorkflow from '@/app/comfyui-workflows/cumface-instid-ipadpt-v2-api.json'
+import sharp from 'sharp'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,6 +40,9 @@ export async function submitHappyFaceJob(
     const sourceImage = await downloadImage(sourceImageUrl);
     const sourceName = await uploadImage(sourceImage);
     workflow[221].inputs.image = sourceName;
+    // set ipadapter strength to 1.12
+    workflow[206].inputs.weight = 1.12;
+  
   } else {
     // If no source image, set weights to 0
     workflow[206].inputs.weight = 0;
@@ -47,13 +51,17 @@ export async function submitHappyFaceJob(
 
   // Set LoRA strengths if provided
   if (cumStrength !== undefined) {
-    workflow[240].inputs.strength_model = cumStrength;
-    workflow[240].inputs.strength_clip = cumStrength;
+    const cumStrengthModelFactor = 0.92;
+    const cumStrengthClipFactor = 1.3;
+    workflow[240].inputs.strength_model = cumStrength * cumStrengthModelFactor;
+    workflow[240].inputs.strength_clip = cumStrength * cumStrengthClipFactor;
   }
 
   if (orgasmStrength !== undefined) {
-    workflow[241].inputs.strength_model = orgasmStrength;
-    workflow[241].inputs.strength_clip = orgasmStrength;
+    const orgasmStrengthModelFactor = 0.77;
+    const orgasmStrengthClipFactor = 0.77;
+    workflow[241].inputs.strength_model = orgasmStrength * orgasmStrengthModelFactor;
+    workflow[241].inputs.strength_clip = orgasmStrength * orgasmStrengthClipFactor;
   }
 
   // Set prompt if provided
@@ -178,8 +186,30 @@ async function downloadImage(url: string): Promise<DownloadedImage> {
     mimeType = 'image/webp';
   }
 
-  const blob = await response.blob();
-  const base64 = await blobToBase64(new Blob([blob], { type: mimeType }));
+  const originalBuffer = await response.arrayBuffer();
+  
+  // Process image with sharp to make it square with padding
+  const image = sharp(Buffer.from(originalBuffer));
+  const metadata = await image.metadata();
+  
+  if (!metadata.width || !metadata.height) {
+    console.error('Could not get image dimensions', metadata);
+    throw new Error('Could not get image dimensions');
+  }
+
+  const maxDimension = Math.max(metadata.width, metadata.height);
+  
+  const paddedImage = await image
+    .resize({
+      width: maxDimension,
+      height: maxDimension,
+      fit: 'contain',
+      background: { r: 255, g: 255, b: 255, alpha: 1 }
+    })
+    .toBuffer();
+
+  const blob = new Blob([paddedImage], { type: mimeType });
+  const base64 = await blobToBase64(new Blob([paddedImage], { type: mimeType }));
   
   return { blob, base64, mimeType };
 }
