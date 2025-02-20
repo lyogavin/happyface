@@ -18,6 +18,7 @@ export async function submitHappyFaceJob(
   cumStrength?: number,
   orgasmStrength?: number
 ): Promise<string> {
+  console.log('submitHappyFaceJob', userId, sourceImageUrl, prompt, cumStrength, orgasmStrength);
   // Check user subscription status first
   const subscription = await getUserSubscriptionStatus(userId);
   if (!subscription || subscription.credits < 1) {
@@ -82,10 +83,12 @@ export async function submitHappyFaceJob(
   });
 
   if (!response.ok) {
+    console.error('Failed to submit ComfyUI job', response);
     throw new Error('Failed to submit ComfyUI job');
   }
 
   const data = await response.json();
+  console.log('ComfyUI job submitted, data', data);
   return data.prompt_id;
 }
 
@@ -93,6 +96,7 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
   const response = await fetch(`${COMFY_API_HOST}/history/${jobId}`);
   
   if (!response.ok) {
+    console.error('Failed to check job status', response);
     throw new Error('Failed to check job status');
   }
 
@@ -117,6 +121,7 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
       });
 
     if (error) {
+      console.error('Failed to upload to Supabase', error);
       throw new Error(`Failed to upload to Supabase: ${error.message}`);
     }
 
@@ -133,6 +138,7 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
       p_result_image_url: publicUrl
     });
     if (rpcError) {
+      console.error('Failed to handle happyface generation', rpcError);
       throw new Error('Failed to handle happyface generation: ' + rpcError.message);
     }
 
