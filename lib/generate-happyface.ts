@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
-import comfyuiWorkflow from '@/app/comfyui-workflows/sd15_cumhair_realcumfacial_api.json'
+import cumfaceInstidIpadapterWorkflow from '@/app/comfyui-workflows/cumface-instid-ipadpt-v2-api.json'
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,14 +25,8 @@ export async function submitHappyFaceJob(
   }
 
   // Load the workflow (create a deep copy to avoid modifying the original)
-  const workflow = JSON.parse(JSON.stringify(comfyuiWorkflow));
+  const workflow = JSON.parse(JSON.stringify(cumfaceInstidIpadapterWorkflow));
   
-  console.log('cumStrength', cumStrength);
-  console.log('orgasmStrength', orgasmStrength);
-  // Set dimensions to 512x512
-  //workflow[225].inputs.width = 512;
-  //workflow[225].inputs.height = 512;
-
   // Set negative prompt
   workflow[7].inputs.text = "ugly, organ, dick, cock, multiple person";
 
@@ -47,11 +41,11 @@ export async function submitHappyFaceJob(
   } else {
     // If no source image, set weights to 0
     workflow[206].inputs.weight = 0;
-    //workflow[237].inputs.weight = 0;
+    workflow[237].inputs.weight = 0;
   }
 
   // Set LoRA strengths if provided
-  /*if (cumStrength !== undefined) {
+  if (cumStrength !== undefined) {
     workflow[240].inputs.strength_model = cumStrength;
     workflow[240].inputs.strength_clip = cumStrength;
   }
@@ -59,7 +53,7 @@ export async function submitHappyFaceJob(
   if (orgasmStrength !== undefined) {
     workflow[241].inputs.strength_model = orgasmStrength;
     workflow[241].inputs.strength_clip = orgasmStrength;
-  }*/
+  }
 
   // Set prompt if provided
   if (prompt) {
@@ -68,11 +62,11 @@ export async function submitHappyFaceJob(
       mergedPrompt = "cum on face, " + prompt;
     }
     if (!prompt.endsWith("orgasm, cum on her face")) {
-      mergedPrompt = prompt + ", orgasm, a lot of white cum on her face";
+      mergedPrompt = prompt + ", orgasm, cum on her face";
     }
     workflow[190].inputs.text = mergedPrompt;
   } else {
-    workflow[190].inputs.text = "cum on face, woman, orgasm, a lot of white cum on her face";
+    workflow[190].inputs.text = "cum on face, woman, orgasm, cum on her face";
   }
 
   // Submit the job to ComfyUI
@@ -105,8 +99,8 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
   const data = await response.json();
   
   // Check if job is completed - node 242 is now the SaveImage node
-  if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[231]?.images?.[0]) {
-    const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[231].images[0].filename}`;
+  if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[242]?.images?.[0]) {
+    const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[242].images[0].filename}`;
     
     // Download the image from ComfyUI
     const imageData = await downloadImage(comfyUrl);

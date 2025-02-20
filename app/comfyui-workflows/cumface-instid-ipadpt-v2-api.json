@@ -1,7 +1,7 @@
 {
   "4": {
     "inputs": {
-      "ckpt_name": "realisticVisionV60B1_v51HyperVAE.safetensors"
+      "ckpt_name": "halcyonSDXL_v19.safetensors"
     },
     "class_type": "CheckpointLoaderSimple",
     "_meta": {
