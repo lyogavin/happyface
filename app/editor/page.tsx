@@ -162,14 +162,6 @@ export default function EditorPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setUploadedImage(event.target.result as string)
-        }
-      }
-      reader.readAsDataURL(file)
-
       try {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -180,13 +172,22 @@ export default function EditorPage() {
         const fileName = `${Math.random()}.${fileExt}`
         const filePath = `happyface_upload/${fileName}`
 
-        const { error } = await supabase.storage
+        const { data, error } = await supabase.storage
           .from('images')
           .upload(filePath, file)
 
         if (error) {
           console.error('Error uploading image:', error.message)
+          return
         }
+
+        // Get the public URL for the uploaded file
+        const { data: { publicUrl } } = supabase.storage
+          .from('images')
+          .getPublicUrl(filePath)
+
+        setUploadedImage(publicUrl)
+
       } catch (error) {
         console.error('Error uploading to Supabase:', error)
       }
