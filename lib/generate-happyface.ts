@@ -189,7 +189,7 @@ async function downloadImage(url: string): Promise<DownloadedImage> {
   const originalBuffer = await response.arrayBuffer();
   
   // Process image with sharp to make it square with padding
-  const image = sharp(Buffer.from(originalBuffer));
+  const image = sharp(Buffer.from(originalBuffer), { failOn: 'truncated' });
   const metadata = await image.metadata();
   
   if (!metadata.width || !metadata.height) {
