@@ -63,21 +63,21 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   // check no rows found in userData
   if (userData && userData.length === 0) {
     // when no rows found, create a new row
+    const freeCredits = 2;
     const { error } = await supabaseClient
       .from('happyface_users')
-      .insert({ clerk_id: user_id, credits: 5 }); // default credits to 5
+      .insert({ clerk_id: user_id, credits: freeCredits }); // default credits to 5
 
     if (error) {
       console.error("Error creating new row for user", user_id, error);
     }
 
-    const remainingCredits = 5;
     
     console.log("created new row for user", user_id);
     return {
-      status: remainingCredits > 0 ? 'active' : 'inactive',
+      status: 'active',
       type: 'credits',
-      credits: Math.max(0, remainingCredits)
+      credits: freeCredits
     };
   }
 
