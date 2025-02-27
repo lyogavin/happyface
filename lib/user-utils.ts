@@ -2,7 +2,7 @@
 
 import { Stripe } from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-
+import appConfig from '@/lib/app-config';
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const supabaseClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
@@ -63,7 +63,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   // check no rows found in userData
   if (userData && userData.length === 0) {
     // when no rows found, create a new row
-    const freeCredits = 2;
+    const freeCredits = appConfig.freeCredits;
     const { error } = await supabaseClient
       .from('happyface_users')
       .insert({ clerk_id: user_id, credits: freeCredits }); // default credits to 5
