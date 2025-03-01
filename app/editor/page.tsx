@@ -33,6 +33,8 @@ import Link from "next/link"
 import { ProfileMenu } from "@/app/components/ProfileMenu"
 import { CreditsBadge } from "@/app/components/CreditsBadge"
 import { Progress } from "@/components/ui/progress"
+import { ClothesRemoverSidebar } from "@/components/clothes-remover-sidebar"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
@@ -231,238 +233,254 @@ export default function EditorPage() {
   )
 
   return (
-    <>
-      {isGenerating && (
-        <Progress 
-          value={progress} 
-          className="fixed top-0 left-0 right-0 z-50 h-1 rounded-none"
-        />
-      )}
-      <nav className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-xl font-bold text-purple-600">
-            Cum Face AI
-          </Link>
-          <div className="flex items-center space-x-4">
-            <CreditsBadge isGenerating={isGenerating}/>
-            <ProfileMenu />
-          </div>
-        </div>
-      </nav>
-      
-      <div className="container mx-auto px-4 py-8">
-        <CreditPurchaseDialog />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        {/* Sidebar */}
+        <ClothesRemoverSidebar className="border-r" />
         
-        <h1 className="text-3xl font-bold mb-8 text-center">Cum Face AI Editor</h1>
-
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        <Card className="mb-12">
-          <CardContent className="p-6">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <form onSubmit={handlePromptSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="prompt">Enter your prompt (optional)</Label>
-                    <Textarea
-                      id="prompt"
-                      placeholder={
-                        uploadedImage
-                          ? "Describe how you want to transform the uploaded image..."
-                          : "Describe the cum face you want to generate..."
-                      }
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      className="w-full"
-                      rows={4}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="image-upload">Upload an image (optional)</Label>
-                    <Input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="w-full"
-                    />
-                    {uploadedImage && (
-                      <div className="mt-2">
-                        <Image
-                          src={uploadedImage}
-                          alt="Uploaded preview"
-                          width={100}
-                          height={100}
-                          className="rounded-lg object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="settings">
-                      <AccordionTrigger>Advanced Settings</AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-6">
-                          <div className="space-y-2">
-                            <Label htmlFor="cum-strength">Cum on face strength: {cumStrength.toFixed(1)}</Label>
-                            <Slider
-                              id="cum-strength"
-                              min={0}
-                              max={1.5}
-                              step={0.1}
-                              value={[cumStrength]}
-                              onValueChange={(value) => setCumStrength(value[0])}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="orgasm-strength">Orgasm face strength: {orgasmStrength.toFixed(1)}</Label>
-                            <Slider
-                              id="orgasm-strength"
-                              min={0}
-                              max={1.5}
-                              step={0.1}
-                              value={[orgasmStrength]}
-                              onValueChange={(value) => setOrgasmStrength(value[0])}
-                            />
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full flex items-center justify-center gap-2" 
-                    disabled={isGenerating || (!uploadedImage && !prompt) || !isLoaded}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
-                        Generating...
-                      </>
-                    ) : (
-                      "Generate Cum Face"
-                    )}
-                    <div className="flex items-center gap-0.5">
-                      <span className="text-yellow-500">1 x </span>
-                      <IconCoin className="h-4 w-4 text-yellow-500" />
-                    </div>
-                  </Button>
-                </form>
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col">
+          {isGenerating && (
+            <Progress 
+              value={progress} 
+              className="fixed top-0 left-0 right-0 z-50 h-1 rounded-none"
+            />
+          )}
+          
+          {/* Header */}
+          <nav className="bg-white shadow-sm">
+            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger />
+                <Link href="/" className="text-xl font-bold text-purple-600">
+                  Cum Face AI
+                </Link>
               </div>
-              <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
-                {currentImage ? (
-                  <div className="relative w-full max-w-[512px]">
-                    {isGenerating ? (
-                      <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
-                        <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
-                      </div>
-                    ) : (
-                      <Image
-                        src={currentImage}
-                        alt="Generated Happy Face"
-                        width={512}
-                        height={512}
-                        className="rounded-lg shadow-lg w-full h-auto"
-                      />
-                    )}
-                    <div className="absolute top-2 right-2 flex gap-2">
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="rounded-full bg-white/80 hover:bg-white"
-                        onClick={() => {
-                          if (currentImage) {
-                            posthog.capture('download_image', {
-                              'image_url': currentImage
-                            })
-                            window.open(currentImage, '_blank')
-                          }
-                        }}
-                        disabled={isGenerating}
-                      >
-                        <IconDownload className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="rounded-full bg-white/80 hover:bg-white"
-                        onClick={handlePromptSubmit}
-                        disabled={isGenerating}
-                      >
-                        {isGenerating ? (
-                          <IconLoader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <IconRefresh className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center w-full max-w-[512px]">
-                    {isGenerating ? (
-                      <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
-                        <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-gray-500 mb-4">Your generated image will appear here</p>
-                        <Image
-                          src="/placeholder.svg?height=200&width=200&text=Happy Face"
-                          alt="Placeholder"
-                          width={200}
-                          height={200}
-                          className="mx-auto opacity-50"
-                        />
-                      </>
-                    )}
-                  </div>
-                )}
+              <div className="flex items-center space-x-4">
+                <CreditsBadge isGenerating={isGenerating}/>
+                <ProfileMenu />
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </nav>
+          
+          {/* Main content */}
+          <div className="flex-1 p-8 overflow-auto">
+            <div className="container mx-auto max-w-[1600px]">
+              <CreditPurchaseDialog />
+              
+              <h1 className="text-3xl font-bold mb-8 text-center">Cum Face AI Editor</h1>
 
-        <h2 className="text-2xl font-bold mb-4">Historical Images</h2>
-        {historicalImages.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {historicalImages.map((img, index) => (
-              <Card key={index}>
-                <CardContent className="p-2 flex justify-center">
-                  <div className="relative w-full aspect-square">
-                    <Image
-                      src={img || "/placeholder.svg"}
-                      alt={`Historical Image ${index + 1}`}
-                      fill
-                      className="rounded-lg object-cover"
-                    />
+              {error && (
+                <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <Card className="mb-12">
+                <CardContent className="p-6">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <form onSubmit={handlePromptSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="prompt">Enter your prompt (optional)</Label>
+                          <Textarea
+                            id="prompt"
+                            placeholder={
+                              uploadedImage
+                                ? "Describe how you want to transform the uploaded image..."
+                                : "Describe the cum face you want to generate..."
+                            }
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            className="w-full"
+                            rows={4}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="image-upload">Upload an image (optional)</Label>
+                          <Input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="w-full"
+                          />
+                          {uploadedImage && (
+                            <div className="mt-2">
+                              <Image
+                                src={uploadedImage}
+                                alt="Uploaded preview"
+                                width={100}
+                                height={100}
+                                className="rounded-lg object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <Accordion type="single" collapsible className="w-full">
+                          <AccordionItem value="settings">
+                            <AccordionTrigger>Advanced Settings</AccordionTrigger>
+                            <AccordionContent>
+                              <div className="space-y-6">
+                                <div className="space-y-2">
+                                  <Label htmlFor="cum-strength">Cum on face strength: {cumStrength.toFixed(1)}</Label>
+                                  <Slider
+                                    id="cum-strength"
+                                    min={0}
+                                    max={1.5}
+                                    step={0.1}
+                                    value={[cumStrength]}
+                                    onValueChange={(value) => setCumStrength(value[0])}
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="orgasm-strength">Orgasm face strength: {orgasmStrength.toFixed(1)}</Label>
+                                  <Slider
+                                    id="orgasm-strength"
+                                    min={0}
+                                    max={1.5}
+                                    step={0.1}
+                                    value={[orgasmStrength]}
+                                    onValueChange={(value) => setOrgasmStrength(value[0])}
+                                  />
+                                </div>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+
+                        <Button 
+                          type="submit" 
+                          className="w-full flex items-center justify-center gap-2" 
+                          disabled={isGenerating || (!uploadedImage && !prompt) || !isLoaded}
+                        >
+                          {isGenerating ? (
+                            <>
+                              <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
+                              Generating...
+                            </>
+                          ) : (
+                            "Generate Cum Face"
+                          )}
+                          <div className="flex items-center gap-0.5">
+                            <span className="text-yellow-500">1 x </span>
+                            <IconCoin className="h-4 w-4 text-yellow-500" />
+                          </div>
+                        </Button>
+                      </form>
+                    </div>
+                    <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
+                      {currentImage ? (
+                        <div className="relative w-full max-w-[512px]">
+                          {isGenerating ? (
+                            <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                              <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
+                            </div>
+                          ) : (
+                            <Image
+                              src={currentImage}
+                              alt="Generated Happy Face"
+                              width={512}
+                              height={512}
+                              className="rounded-lg shadow-lg w-full h-auto"
+                            />
+                          )}
+                          <div className="absolute top-2 right-2 flex gap-2">
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="rounded-full bg-white/80 hover:bg-white"
+                              onClick={() => {
+                                if (currentImage) {
+                                  posthog.capture('download_image', {
+                                    'image_url': currentImage
+                                  })
+                                  window.open(currentImage, '_blank')
+                                }
+                              }}
+                              disabled={isGenerating}
+                            >
+                              <IconDownload className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="rounded-full bg-white/80 hover:bg-white"
+                              onClick={handlePromptSubmit}
+                              disabled={isGenerating}
+                            >
+                              {isGenerating ? (
+                                <IconLoader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <IconRefresh className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center w-full max-w-[512px]">
+                          {isGenerating ? (
+                            <div className="w-full aspect-square rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+                              <IconLoader2 className="h-8 w-8 animate-spin text-gray-400" />
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-gray-500 mb-4">Your generated image will appear here</p>
+                              <Image
+                                src="/placeholder.svg?height=200&width=200&text=Happy Face"
+                                alt="Placeholder"
+                                width={200}
+                                height={200}
+                                className="mx-auto opacity-50"
+                              />
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+
+              <h2 className="text-2xl font-bold mb-4">Historical Images</h2>
+              {historicalImages.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {historicalImages.map((img, index) => (
+                    <Card key={index}>
+                      <CardContent className="p-2 flex justify-center">
+                        <div className="relative w-full aspect-square">
+                          <Image
+                            src={img || "/placeholder.svg"}
+                            alt={`Historical Image ${index + 1}`}
+                            fill
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-gray-500 text-lg mb-4">You haven&apos;t generated any images yet.</p>
+                    <p className="text-gray-400">Use the prompt input above to create your first Happy Face!</p>
+                    <Image
+                      src="/placeholder.svg?height=200&width=200&text=No Images Yet"
+                      alt="No Images Placeholder"
+                      width={200}
+                      height={200}
+                      className="mx-auto mt-6 opacity-50"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
-        ) : (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-gray-500 text-lg mb-4">You haven&apos;t generated any images yet.</p>
-              <p className="text-gray-400">Use the prompt input above to create your first Happy Face!</p>
-              <Image
-                src="/placeholder.svg?height=200&width=200&text=No Images Yet"
-                alt="No Images Placeholder"
-                width={200}
-                height={200}
-                className="mx-auto mt-6 opacity-50"
-              />
-            </CardContent>
-          </Card>
-        )}
+        </div>
       </div>
-    </>
+    </SidebarProvider>
   )
 }
 

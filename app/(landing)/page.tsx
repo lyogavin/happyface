@@ -193,8 +193,8 @@ export default function LandingPage() {
               <Link href="/terms-of-use/index.html" className="text-sm hover:text-gray-300">
                 Terms of Service
               </Link>
-              <Link href="/privacy_policy/index.html" className="text-sm hover:text-gray-300">
-                Privacy Policy
+              <Link href="/disclaimer" className="text-sm hover:text-gray-300">
+                Disclaimer
               </Link>
               <Link href="mailto:gavinli@animaai.cloud" className="text-sm hover:text-gray-300">
                 Contact Us
