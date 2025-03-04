@@ -65,17 +65,19 @@ export async function submitHappyFaceJob(
   }
 
   // Set prompt if provided
+  const cumPart = cumStrength && cumStrength > 0.2 ? 'cum on face, ' : '';
+  const orgasmPart = orgasmStrength && orgasmStrength > 0.2 ? 'orgasm, ' : '';
   if (prompt) {
     let mergedPrompt = prompt;
     if (!prompt.startsWith("cum on face")) {
-      mergedPrompt = "cum on face, " + prompt;
+      mergedPrompt = `${cumPart} ${prompt}`;
     }
-    if (!prompt.endsWith("orgasm, cum on her face")) {
-      mergedPrompt = prompt + ", orgasm, cum on her face";
+    if (!prompt.endsWith("orgasm, cum on face")) {
+      mergedPrompt = `${prompt} ${orgasmPart} ${cumPart}`;
     }
     workflow[190].inputs.text = mergedPrompt;
   } else {
-    workflow[190].inputs.text = "cum on face, woman, orgasm, cum on her face";
+    workflow[190].inputs.text = `${cumPart} ${orgasmPart}`;
   }
 
   // Submit the job to ComfyUI
@@ -115,19 +117,28 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
     const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[242].images[0].filename}`;
     
     // Download the image from ComfyUI
+    // log download image time
+    const startTime = new Date();
     const imageData = await downloadImage(comfyUrl);
+    const endTime = new Date();
+    const downloadTime = endTime.getTime() - startTime.getTime();
+    console.log('Download time', downloadTime);
     
     // Upload to Supabase with UUID filename
     const fileName = `${crypto.randomUUID()}.${imageData.mimeType.split('/')[1]}`;
     const filePath = `public/happyface/${fileName}`;
     
+    // log upload time
+    const uploadStartTime = new Date();
     const { error } = await supabase.storage
       .from('images')
       .upload(filePath, imageData.blob, {
         contentType: imageData.mimeType,
         upsert: true
       });
-
+    const uploadEndTime = new Date();
+    const uploadTime = uploadEndTime.getTime() - uploadStartTime.getTime();
+    console.log('Upload time', uploadTime);
     if (error) {
       console.error('Failed to upload to Supabase', error);
       throw new Error(`Failed to upload to Supabase: ${error.message}`);
@@ -138,6 +149,8 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
       .from('images')
       .getPublicUrl(filePath);
 
+    // log handle happyface generation time
+    const handleHappyfaceStartTime = new Date();
     // call supabase rpc handle_happyface_generation to save result and decrease credits
     const { error: rpcError } = await supabase.rpc('handle_happyface_generation', {
       p_user_id: userId,
@@ -145,10 +158,15 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
       p_prompt: prompt,
       p_result_image_url: publicUrl
     });
+    const handleHappyfaceEndTime = new Date();
+    const handleHappyfaceTime = handleHappyfaceEndTime.getTime() - handleHappyfaceStartTime.getTime();
+    console.log('Handle happyface time', handleHappyfaceTime);
     if (rpcError) {
       console.error('Failed to handle happyface generation', rpcError);
       throw new Error('Failed to handle happyface generation: ' + rpcError.message);
     }
+
+    console.log('Total time', downloadTime + uploadTime + handleHappyfaceTime, 'returning:', publicUrl);
 
     return {
       status: 'completed',

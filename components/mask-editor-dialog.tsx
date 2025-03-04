@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog"
 import { MaskEditor } from "@/components/react-mask-editor/maskEditor"
 import { IconRefresh, IconInfoCircle, IconBrush } from "@tabler/icons-react"
-import { MaskEditorRef } from "@/components/react-mask-editor/maskEditor"
 import {
   Popover,
   PopoverContent,
@@ -26,7 +25,8 @@ interface MaskEditorDialogProps {
   imageUrl: string | null
   title: string
   onSave: (maskDataUrl: string) => void
-  initialMask?: string
+  maskData?: string
+  setMaskData?: (data: string) => void
 }
 
 export function MaskEditorDialog({
@@ -35,31 +35,86 @@ export function MaskEditorDialog({
   imageUrl,
   title,
   onSave,
-  initialMask,
+  maskData,
+  setMaskData,
 }: MaskEditorDialogProps) {
   const [brushSize, setBrushSize] = React.useState(30)
-  const maskCanvasRef = React.useRef<HTMLCanvasElement>(null)
-  const maskEditorRef = React.useRef<MaskEditorRef>(null)
+
+  const saveToAlpha = () => {
+    if (!maskData) return undefined;
+    
+    const canvas = document.createElement('canvas');
+    const img = new (window.Image as any)();
+    
+    return new Promise<string>((resolve) => {
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve('');
+        
+        ctx.drawImage(img, 0, 0);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        
+        const alphaCanvas = document.createElement('canvas');
+        alphaCanvas.width = canvas.width;
+        alphaCanvas.height = canvas.height;
+        const alphaCtx = alphaCanvas.getContext('2d');
+        if (!alphaCtx) return resolve('');
+        
+        const alphaImageData = alphaCtx.createImageData(canvas.width, canvas.height);
+        const alphaData = alphaImageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          // Set RGB to white (255, 255, 255)
+          alphaData[i] = 0;     // R
+          alphaData[i+1] = 0;   // G
+          alphaData[i+2] = 0;   // B
+          // Set alpha based on the mask (invert the red channel)
+          alphaData[i+3] = data[i];  // A
+        }
+        
+        alphaCtx.putImageData(alphaImageData, 0, 0);
+        resolve(alphaCanvas.toDataURL('image/png'));
+      };
+      
+      img.src = maskData;
+    });
+  };
 
   const handleSave = async () => {
-    if (maskEditorRef.current) {
-      try {
-        const imageWithAlpha = await maskEditorRef.current.saveToAlpha();
-        if (imageWithAlpha) {
-          onSave(imageWithAlpha);
-          onOpenChange(false);
-        } else {
-          console.error("Failed to generate mask: empty result");
-        }
-      } catch (error) {
-        console.error("Error saving mask:", error);
+    try {
+      const finalMaskData = await saveToAlpha();
+      if (finalMaskData) {
+        onSave(finalMaskData);
+        onOpenChange(false);
+      } else {
+        console.error("Failed to generate mask: empty result");
       }
+    } catch (error) {
+      console.error("Error saving mask:", error);
     }
   }
 
   const handleReset = () => {
-    if (maskEditorRef.current) {
-      maskEditorRef.current.resetMask()
+    // Create a blank white canvas and set it as the mask data
+    if (setMaskData && imageUrl) {
+      const img = new (window.Image as any)();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/png');
+          setMaskData(dataUrl);
+        }
+      };
+      img.src = imageUrl;
     }
   }
 
@@ -144,15 +199,15 @@ export function MaskEditorDialog({
               alignItems: 'center'
             }}>
               <MaskEditor
-                ref={maskEditorRef}
                 src={imageUrl}
                 cursorSize={brushSize}
-                maskOpacity={0.85}
+                maskOpacity={0.75}
                 onCursorSizeChange={setBrushSize}
-                canvasRef={maskCanvasRef as React.MutableRefObject<HTMLCanvasElement>}
                 maskColor="#000000"
                 maskBlendMode="overlay"
-                initialMask={initialMask}
+                maskData={maskData}
+                onMaskDataChange={setMaskData}
+                onResetMask={handleReset}
               />
             </div>
           ) : (

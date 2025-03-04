@@ -155,6 +155,53 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Clothes Remover Section */}
+        <section className="py-20 bg-gradient-to-r from-purple-50 to-pink-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <h2 className="text-3xl font-extrabold text-center mb-8">Try Our AI Clothes Remover</h2>
+            <p className="text-xl text-center text-gray-600 max-w-3xl mx-auto mb-12">
+              Transform any photo with our cutting-edge AI technology. Remove clothing from images with stunning realism and precision.
+            </p>
+            <div className="flex justify-center mb-12">
+              <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Link href="/clothes-remover" className="flex items-center gap-2">
+                  Try Clothes Remover
+                </Link>
+              </Button>
+            </div>
+            <div className="max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <h3 className="text-xl font-bold mb-4">Advanced AI Technology</h3>
+                  <p className="text-gray-600 mb-4">
+                    Our AI clothes remover uses state-of-the-art machine learning models to create hyper-realistic results that look natural and authentic.
+                  </p>
+                  <Image
+                    src="/clothes-removers-examples/example0-after.png"
+                    alt="AI Clothes Remover Example"
+                    width={400}
+                    height={300}
+                    className="rounded-lg"
+                  />
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <h3 className="text-xl font-bold mb-4">Easy to Use</h3>
+                  <p className="text-gray-600 mb-4">
+                    Simply upload your image, create a mask to highlight the areas you want to transform, and let our AI do the rest. No technical skills required!
+                  </p>
+                  <Image
+                    src="/clothes-removers-examples/example1-after.png"
+                    alt="AI Clothes Remover Interface"
+                    width={400}
+                    height={300}
+                    className="rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Featured On Section */}
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

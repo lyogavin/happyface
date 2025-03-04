@@ -40,7 +40,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
     return { 
       status: 'active',
       type: 'pro',
-      credits: 1000
+      credits: 0
     };
   }
 
@@ -101,11 +101,12 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   };
 };
 
-export const getUserGenerations = async (user_id: string) => {
+export const getUserGenerations = async (user_id: string, feature: string) => {
   const { data, error } = await supabaseClient
     .from('happyface_generations')
     .select('generation')
     .eq('user_id', user_id)
+    .eq('feature', feature)
     .order('created_at', { ascending: false })
     .limit(20); // Limit to most recent 20 generations
 

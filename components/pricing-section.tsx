@@ -12,6 +12,7 @@ export default function PricingSection() {
   const { user, isSignedIn } = useUser()
   const clerk = useClerk()
   const [isLoading, setIsLoading] = useState(false)
+
   
   const handlePurchaseClick = async (plan: typeof appConfig.prices[0]) => {
     if (!isSignedIn) {

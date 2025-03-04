@@ -1,11 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { hexToRgb } from './utils';
-
-export interface MaskEditorRef {
-  resetMask: () => void;
-  saveToAlpha: () => Promise<string>;
-}
+import React, { useCallback, useRef, useState } from 'react';
 
 interface Vector2 {
   x: number;
@@ -20,18 +14,24 @@ interface MaskEditorProps {
   maskBlendMode?: string;
   onCursorSizeChange?: (size: number) => void;
   canvasRef?: React.MutableRefObject<HTMLCanvasElement>;
-  initialMask?: string;
+  maskData?: string;
+  onMaskDataChange?: (maskData: string) => void;
+  onResetMask?: () => void;
+  onSaveToAlpha?: (dataUrl: string) => void;
 }
 
-export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: MaskEditorProps, ref) => {
+export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
   const {
     src,
     cursorSize,
-    maskOpacity = 0.5,
+    maskOpacity = 0.85,
     maskColor = "#ff0000",
     maskBlendMode = "normal",
     onCursorSizeChange,
-    initialMask
+    maskData,
+    onMaskDataChange,
+    onResetMask,
+    onSaveToAlpha
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,18 +40,18 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
   const cursorCanvas = useRef<HTMLCanvasElement>(null);
   const backgroundCanvas = useRef<HTMLCanvasElement>(null);
 
-  const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+  const [, setContext] = useState<CanvasRenderingContext2D | null>(null);
   const [maskContext, setMaskContext] = useState<CanvasRenderingContext2D | null>(null);
   const [cursorContext, setCursorContext] = useState<CanvasRenderingContext2D | null>(null);
-  const [backgroundContext, setBackgroundContext] = useState<CanvasRenderingContext2D | null>(null);
+  const [, setBackgroundContext] = useState<CanvasRenderingContext2D | null>(null);
   const [size, setSize] = useState<Vector2>({ x: 0, y: 0 });
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState<Vector2 | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [, setImageLoaded] = useState(false);
 
   const getMaxDimensions = useCallback(() => {
     const maxWidth = 800;
-    const maxHeight = 800;
+    const maxHeight = 600;
     return { maxWidth, maxHeight };
   }, []);
 
@@ -112,16 +112,7 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
             maskCanvas.current.width = width;
             maskCanvas.current.height = height;
             maskCtx.fillStyle = "#ffffff";
-            maskCtx.fillRect(0, 0, width, height);
-            
-            // If initialMask is provided, load it
-            if (initialMask) {
-              const maskImg = new Image();
-              maskImg.onload = () => {
-                maskCtx.drawImage(maskImg, 0, 0, width, height);
-              };
-              maskImg.src = initialMask;
-            }
+            maskCtx.fillRect(0, 0, width, height);  
           }
         }
         
@@ -158,7 +149,7 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
     
     console.log("[MaskEditor] Setting image src:", src);
     img.src = src;
-  }, [src, getMaxDimensions, initialMask]);
+  }, [src, getMaxDimensions]);
 
   // Pass mask canvas up
   React.useLayoutEffect(() => {
@@ -185,45 +176,42 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
     }
   }, []);
 
-  // Handle mouse events for drawing
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!maskContext) return;
+  // Add this function to draw the cursor
+  const drawCursor = useCallback((x: number, y: number) => {
+    if (!cursorContext || !cursorCanvas.current) return;
     
-    setIsDrawing(true);
-    const rect = cursorCanvas.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Draw a dot at the starting position
-    maskContext.fillStyle = "#000000";
-    maskContext.beginPath();
-    maskContext.arc(x, y, cursorSize / 2, 0, Math.PI * 2);
-    maskContext.fill();
-    
-    setLastPos({ x, y });
-  }, [cursorSize, maskContext]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!cursorContext || !maskContext) return;
-    
-    const rect = cursorCanvas.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // Update cursor position
+    // Clear previous cursor
     cursorContext.clearRect(0, 0, size.x, size.y);
-    cursorContext.strokeStyle = "#000000";
-    cursorContext.lineWidth = 1;
+    
+    // Draw new cursor
     cursorContext.beginPath();
+    cursorContext.fillStyle = `${maskColor}88`; // Semi-transparent fill
+    cursorContext.strokeStyle = maskColor;
     cursorContext.arc(x, y, cursorSize / 2, 0, Math.PI * 2);
+    cursorContext.fill();
     cursorContext.stroke();
+  }, [cursorContext, cursorSize, size.x, size.y, maskColor]);
+
+  // Add this function to get canvas coordinates
+  const getCanvasCoordinates = useCallback((clientX: number, clientY: number) => {
+    const rect = maskCanvas.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    return { x, y };
+  }, []);
+
+  // Update mouse event handlers to use these functions
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const { x, y } = getCanvasCoordinates(e.clientX, e.clientY);
+    
+    // Draw cursor
+    drawCursor(x, y);
     
     // Draw line if we're drawing
-    if (isDrawing && lastPos) {
+    if (isDrawing && lastPos && maskContext) {
       maskContext.fillStyle = "#000000";
       maskContext.beginPath();
       maskContext.arc(x, y, cursorSize / 2, 0, Math.PI * 2);
@@ -240,19 +228,16 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
       
       setLastPos({ x, y });
     }
-  }, [cursorContext, maskContext, cursorSize, isDrawing, lastPos, size.x, size.y]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDrawing(false);
-    setLastPos(null);
-  }, []);
+  }, [maskContext, cursorSize, isDrawing, lastPos, drawCursor, getCanvasCoordinates]);
 
   const handleMouseLeave = useCallback(() => {
+    setIsDrawing(false);
+    setLastPos(null);
+    
+    // Clear cursor when mouse leaves
     if (cursorContext) {
       cursorContext.clearRect(0, 0, size.x, size.y);
     }
-    setIsDrawing(false);
-    setLastPos(null);
   }, [cursorContext, size.x, size.y]);
 
   // Handle wheel event for brush size
@@ -264,14 +249,7 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
     if (onCursorSizeChange) {
       onCursorSizeChange(newSize);
     }
-  }, [cursorContext, maskContext, cursorCanvas, cursorSize, maskColor, size, onCursorSizeChange]);
-
-  const resetMask = React.useCallback(() => {
-    if (maskContext) {
-      maskContext.fillStyle = "#ffffff";
-      maskContext.fillRect(0, 0, size.x, size.y);
-    }
-  }, [maskContext, size]);
+  }, [cursorSize, onCursorSizeChange]);
 
   // Add initialization for background canvas
   React.useLayoutEffect(() => {
@@ -285,58 +263,43 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
     }
   }, [size.x, size.y]);
 
-  const saveToAlpha = React.useCallback((): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (!maskCanvas.current) {
-        reject("No mask canvas available");
-        return;
-      }
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = size.x;
-      canvas.height = size.y;
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) {
-        reject("Could not create canvas context");
-        return;
-      }
-      
-      // Get the mask data
-      const maskCtx = maskCanvas.current.getContext('2d');
-      if (!maskCtx) {
-        reject("Could not get mask context");
-        return;
-      }
-      
-      const maskData = maskCtx.getImageData(0, 0, size.x, size.y);
-      
-      // Create a new image with the mask as alpha
-      const imageData = ctx.createImageData(size.x, size.y);
-      
-      for (let i = 0; i < maskData.data.length; i += 4) {
-        // If the mask pixel is white (255), make it transparent in the output
-        // If the mask pixel is black (0), make it opaque in the output
-        const alpha = 255 - maskData.data[i]; // Invert: white becomes transparent, black becomes opaque
-        
-        imageData.data[i] = 0;     // R
-        imageData.data[i+1] = 0;   // G
-        imageData.data[i+2] = 0;   // B
-        imageData.data[i+3] = alpha; // A
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-      
-      // Return as data URL
-      resolve(canvas.toDataURL('image/png'));
-    });
-  }, [size.x, size.y]);
 
-  // Update the useImperativeHandle to include the new method
-  React.useImperativeHandle(ref, () => ({
-    resetMask,
-    saveToAlpha
-  }));
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    const { x, y } = getCanvasCoordinates(e.clientX, e.clientY);
+    
+    if (maskContext) {
+      maskContext.fillStyle = "#000000";
+      maskContext.beginPath();
+      maskContext.arc(x, y, cursorSize / 2, 0, Math.PI * 2);
+      maskContext.fill();
+    }
+    
+    setLastPos({ x, y });
+  }, [cursorSize, maskContext, getCanvasCoordinates]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDrawing(false);
+    setLastPos(null);
+    
+    // If we have an onMaskDataChange callback, generate and send the mask data
+    if (onMaskDataChange && maskCanvas.current) {
+      const dataUrl = maskCanvas.current.toDataURL('image/png');
+      onMaskDataChange(dataUrl);
+    }
+  }, [onMaskDataChange]);
+
+  // Add effect to update mask when maskData prop changes
+  React.useEffect(() => {
+    if (maskData && maskContext && size.x > 0 && size.y > 0) {
+      const maskImg = new Image();
+      maskImg.onload = () => {
+        maskContext.clearRect(0, 0, size.x, size.y);
+        maskContext.drawImage(maskImg, 0, 0, size.x, size.y);
+      };
+      maskImg.src = maskData;
+    }
+  }, [maskData, maskContext, size.x, size.y]);
 
   return <div className="react-mask-editor-outer" ref={containerRef}>
     {/* Disable next/image warning for this specific img tag */}
@@ -381,7 +344,7 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
           width: size.x,
           height: size.y,
           zIndex: 1,
-          opacity: 0.75
+          opacity: 0.85
         }}
         width={size.x}
         height={size.y}
@@ -397,11 +360,17 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
           height: size.y,
           opacity: maskOpacity,
           mixBlendMode: maskBlendMode as React.CSSProperties['mixBlendMode'],
-          zIndex: 2
+          zIndex: 2,
+          cursor: 'crosshair'
         }}
         width={size.x}
         height={size.y}
         className="react-mask-editor-mask-canvas"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onWheel={handleWheel}
       />
       <canvas
         ref={cursorCanvas}
@@ -411,17 +380,15 @@ export const MaskEditor: React.FC<MaskEditorProps> = React.forwardRef((props: Ma
           left: 0,
           width: size.x,
           height: size.y,
-          zIndex: 3
+          zIndex: 3,
+          pointerEvents: 'none' // Important: allows clicks to pass through
         }}
         width={size.x}
         height={size.y}
         className="react-mask-editor-cursor-canvas"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onWheel={handleWheel}
       />
     </div>
   </div>
-}) 
+}
+
+MaskEditor.displayName = 'MaskEditor'; 

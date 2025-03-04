@@ -69,13 +69,13 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
     },
     {
       id: "premium-2",
-      label: "Batch Processing",
+      label: "Best AI Models",
       icon: IconCrown,
       isPremium: true
     },
     {
       id: "premium-3",
-      label: "Advanced Options",
+      label: "Any Pose",
       icon: IconHeart,
       isPremium: true
     }
@@ -91,9 +91,9 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
             width={24} 
             height={24} 
           />
-          <h2 className="text-lg font-semibold tracking-tight">
+          <p className="text-lg font-semibold tracking-tight">
             Cum Face AI
-          </h2>
+          </p>
         </div>
         <SidebarContent className="px-2">
           {sidebarItems.map((item) => (
@@ -118,9 +118,9 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
       <Separator />
       
       <div className="py-4 px-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+        <p className="mb-2 px-4 text-lg font-semibold tracking-tight">
           Premium Features
-        </h2>
+        </p>
         <ScrollArea className="h-[180px]">
           <SidebarContent className="px-2">
             {premiumFeatures.map((item) => (
@@ -149,13 +149,15 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
         <div className="rounded-md bg-blue-50 p-3">
           <div className="flex items-center gap-2">
             <IconInfoCircle className="h-4 w-4 text-blue-600" />
-            <h3 className="text-sm font-medium text-blue-600">Need Help?</h3>
+            <p className="text-sm font-medium text-blue-600">Need Help?</p>
           </div>
           <p className="mt-2 text-xs text-blue-600">
             Check our tutorials or contact support for assistance with the clothes removal tool.
           </p>
           <Button variant="link" size="sm" className="mt-2 h-auto p-0 text-xs text-blue-600">
-            View Tutorials
+            <Link href="mailto:gavinli@animaai.cloud">
+              Contact Us
+            </Link>
           </Button>
         </div>
       </div>

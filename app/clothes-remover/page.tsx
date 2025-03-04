@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@supabase/supabase-js"
-import { submitHappyFaceJob, checkHappyFaceStatus } from "@/lib/generate-happyface"
+import { submitRemoveClothesJob, checkRemoveClothesStatus } from "@/lib/remove-clothes"
 import { IconCoin, IconRefresh, IconLoader2, IconDownload, IconUpload, IconEdit } from "@tabler/icons-react"
 import {
   Dialog,
@@ -35,6 +35,8 @@ import { Progress } from "@/components/ui/progress"
 import { MaskEditorDialog } from "@/components/mask-editor-dialog"
 import { ClothesRemoverSidebar } from "@/components/clothes-remover-sidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { EditorFooter } from "@/app/components/EditorFooter"
+import { ClothesRemoverLanding } from "@/app/components/clothes-remover-landing"
 
 export default function ClothesRemoverPage() {
   const { user, isLoaded } = useUser()
@@ -49,7 +51,7 @@ export default function ClothesRemoverPage() {
   const [nudityStrength, setNudityStrength] = useState(1.0)
   const [progress, setProgress] = useState(0)
   const [showMaskEditor, setShowMaskEditor] = useState(false)
-
+  const [canvasData, setCanvasData] = useState<string | null>(null)
   // Add useEffect to load historical generations
   useEffect(() => {
     const loadHistoricalGenerations = async () => {
@@ -109,15 +111,49 @@ export default function ClothesRemoverPage() {
         'uploaded_image': uploadedImage
       })
 
-      // This would need to be updated to use a clothes removal specific API
-      const jobId = await submitHappyFaceJob(
+      // Upload mask image to Supabase
+      let maskImageUrl = maskImage;
+      if (maskImage && maskImage.startsWith('data:')) {
+        try {
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          )
+          
+          // Convert data URL to Blob
+          const response = await fetch(maskImage);
+          const blob = await response.blob();
+          
+          const fileName = `mask_${Math.random().toString(36).substring(2, 15)}.png`;
+          const filePath = `uploadedMasks/${fileName}`;
+          
+          const { error } = await supabase.storage
+            .from('images')
+            .upload(filePath, blob);
+            
+          if (error) {
+            console.error('Error uploading mask image:', error.message);
+            throw new Error('Failed to upload mask image');
+          }
+          
+          // Get the public URL for the uploaded mask
+          const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(filePath);
+          
+          maskImageUrl = publicUrl;
+        } catch (error) {
+          console.error('Error uploading mask to Supabase:', error);
+          throw new Error('Failed to upload mask image');
+        }
+      }
+
+      // Use the new clothes removal specific API with the uploaded mask URL
+      const jobId = await submitRemoveClothesJob(
         userId || '', 
-        uploadedImage, 
-        prompt,
-        nudityStrength,
-        0,
-        "clothes-remover",
-        maskImage
+        uploadedImage,
+        maskImageUrl,
+        prompt
       )
 
       if (jobId === 'Insufficient credits') {
@@ -130,7 +166,7 @@ export default function ClothesRemoverPage() {
 
       const checkStatus = async () => {
         try {
-          const result = await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)
+          const result = await checkRemoveClothesStatus(jobId, userId || '', uploadedImage, prompt)
           
           if (result.status === 'completed' && result.url) {
             const endTime = new Date()
@@ -230,6 +266,7 @@ export default function ClothesRemoverPage() {
 
         setUploadedImage(publicUrl)
         setMaskImage(null) // Reset mask when new image is uploaded
+        setCanvasData(null)
 
       } catch (error) {
         console.error('Error uploading to Supabase:', error)
@@ -268,7 +305,7 @@ export default function ClothesRemoverPage() {
         <DialogHeader>
           <DialogTitle>Need More Credits</DialogTitle>
           <DialogDescription>
-            You don{"'"}t have enough credits to generate images. Purchase more credits to continue.
+            You don&apos;t have enough credits to generate images. Purchase more credits to continue.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -325,7 +362,7 @@ export default function ClothesRemoverPage() {
           <div className="flex-1 p-8 overflow-auto">
             <CreditPurchaseDialog />
             
-            <h1 className="text-3xl font-bold mb-8 text-center">AI Clothes Remover</h1>
+            <p className="text-3xl font-bold mb-8 text-center">AI Clothes Remover</p>
 
             {/* Container with much wider max width */}
             <div className="max-w-[1600px] mx-auto">
@@ -363,8 +400,19 @@ export default function ClothesRemoverPage() {
                                 alt="Uploaded preview"
                                 width={300}
                                 height={300}
-                                className="rounded-lg object-contain max-h-[300px]"
+                                className={`rounded-lg object-contain max-h-[300px] ${maskImage ? 'opacity-80' : ''}`}
                               />
+                              {maskImage && (
+                                <div className="absolute inset-0 flex justify-center">
+                                  <Image
+                                    src={maskImage}
+                                    alt="Mask preview"
+                                    width={300}
+                                    height={300}
+                                    className="rounded-lg object-contain max-h-[300px] opacity-50"
+                                  />
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <div className="py-12">
@@ -400,10 +448,10 @@ export default function ClothesRemoverPage() {
                         <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-700 mb-4">
                           <p className="font-medium mb-2">How to create a mask:</p>
                           <ol className="list-decimal pl-5 space-y-1">
-                            <li>Click "Create Mask" after uploading your image</li>
+                            <li>Click &quot;Create Mask&quot; after uploading your image</li>
                             <li>Use the brush tool to paint over the areas where you want to remove clothes</li>
-                            <li>Be precise - the quality of your mask affects the final result</li>
-                            <li>Click "Save Mask" when you're done</li>
+                            <li>Be precise - don&apos;t miss any small areas</li>
+                            <li>Click &quot;Save Mask&quot; when you&apos;re done</li>
                           </ol>
                         </div>
                         
@@ -454,7 +502,7 @@ export default function ClothesRemoverPage() {
                             "Remove Clothes"
                           )}
                           <div className="flex items-center gap-0.5">
-                            <span className="text-yellow-500">2 x </span>
+                            <span className="text-yellow-500">1 x </span>
                             <IconCoin className="h-4 w-4 text-yellow-500" />
                           </div>
                         </Button>
@@ -462,15 +510,15 @@ export default function ClothesRemoverPage() {
                     </div>
                     <div className="space-y-4 flex flex-col h-full">
                       <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg shadow-sm">
-                        <h3 className="text-lg font-medium text-center mb-2">How It Works</h3>
+                        <p className="text-lg font-medium text-center mb-2">How It Works</p>
                         <div className="flex items-center justify-center gap-4">
                           <div className="text-center">
                             <div className="bg-white p-2 rounded-lg shadow-sm mb-2">
                               <Image
-                                src="/upload-icon.svg" 
+                                src="/example-before.webp" 
                                 alt="Upload"
-                                width={40}
-                                height={40}
+                                width={100}
+                                height={100}
                                 className="mx-auto"
                               />
                             </div>
@@ -480,10 +528,10 @@ export default function ClothesRemoverPage() {
                           <div className="text-center">
                             <div className="bg-white p-2 rounded-lg shadow-sm mb-2">
                               <Image
-                                src="/mask-icon.svg" 
+                                src="/example-mask.webp" 
                                 alt="Mask"
-                                width={40}
-                                height={40}
+                                width={100}
+                                height={100}
                                 className="mx-auto"
                               />
                             </div>
@@ -493,10 +541,10 @@ export default function ClothesRemoverPage() {
                           <div className="text-center">
                             <div className="bg-white p-2 rounded-lg shadow-sm mb-2">
                               <Image
-                                src="/generate-icon.svg" 
+                                src="/example-after.png" 
                                 alt="Generate"
-                                width={40}
-                                height={40}
+                                width={100}
+                                height={100}
                                 className="mx-auto"
                               />
                             </div>
@@ -561,7 +609,8 @@ export default function ClothesRemoverPage() {
                               </div>
                             ) : (
                               <>
-                                <p className="text-gray-500 mb-4">Your clothes-free image will appear here</p>
+                                <p className="text-gray-500 text-lg mb-4">Generated images will appear here.</p>
+                                <p className="text-gray-400 mb-4">Upload an image, create a mask, and click &quot;Remove Clothes&quot; to get started!</p>
                                 <Image
                                   src="/placeholder.svg?height=200&width=200&text=Clothes Remover"
                                   alt="Placeholder"
@@ -579,7 +628,7 @@ export default function ClothesRemoverPage() {
                 </CardContent>
               </Card>
 
-              <h2 className="text-2xl font-bold mb-4">Historical Images</h2>
+              <p className="text-2xl font-bold mb-4">Historical Images</p>
               {historicalImages.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {historicalImages.map((img, index) => (
@@ -601,7 +650,7 @@ export default function ClothesRemoverPage() {
                 <Card>
                   <CardContent className="p-8 text-center">
                     <p className="text-gray-500 text-lg mb-4">You haven&apos;t generated any clothes-free images yet.</p>
-                    <p className="text-gray-400">Upload an image, create a mask, and click "Remove Clothes" to get started!</p>
+                    <p className="text-gray-400">Upload an image, create a mask, and click &quot;Remove Clothes&quot; to get started!</p>
                     <Image
                       src="/placeholder.svg?height=200&width=200&text=No Images Yet"
                       alt="No Images Placeholder"
@@ -612,8 +661,14 @@ export default function ClothesRemoverPage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Landing Page Component */}
+              <ClothesRemoverLanding />
             </div>
           </div>
+          
+          {/* Footer */}
+          <EditorFooter />
         </div>
         
         <MaskEditorDialog
@@ -622,7 +677,8 @@ export default function ClothesRemoverPage() {
           imageUrl={uploadedImage}
           title="Create Mask for Clothes Removal"
           onSave={handleSaveMask}
-          initialMask={maskImage}
+          maskData={canvasData}
+          setMaskData={setCanvasData}
         />
       </div>
     </SidebarProvider>

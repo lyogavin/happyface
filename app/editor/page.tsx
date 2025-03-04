@@ -35,6 +35,7 @@ import { CreditsBadge } from "@/app/components/CreditsBadge"
 import { Progress } from "@/components/ui/progress"
 import { ClothesRemoverSidebar } from "@/components/clothes-remover-sidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { EditorFooter } from "@/app/components/EditorFooter"
 
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
@@ -54,7 +55,7 @@ export default function EditorPage() {
     const loadHistoricalGenerations = async () => {
       if (user?.id) {
         try {
-          const generations = await getUserGenerations(user.id);
+          const generations = await getUserGenerations(user.id, 'cum-face');
           setHistoricalImages(generations);
         } catch (error) {
           console.error("Failed to load historical generations:", error);
@@ -107,6 +108,7 @@ export default function EditorPage() {
       }
 
       const checkStatus = async () => {
+        const expectedTotalTime = 88;
         try {
           const result = await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)
           
@@ -129,7 +131,7 @@ export default function EditorPage() {
             throw new Error('Failed to generate image')
           } else {
             const elapsedSeconds = (new Date().getTime() - startTime.getTime()) / 1000
-            const progressPercent = Math.min(Math.floor((elapsedSeconds / 45) * 100), 99)
+            const progressPercent = Math.min(Math.floor((elapsedSeconds / expectedTotalTime) * 100), 99)
             setProgress(progressPercent)
             setTimeout(checkStatus, 1000)
           }
@@ -478,6 +480,9 @@ export default function EditorPage() {
               )}
             </div>
           </div>
+          
+          {/* Footer */}
+          <EditorFooter />
         </div>
       </div>
     </SidebarProvider>

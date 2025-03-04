@@ -2,6 +2,7 @@ export const appConfig = {
   appName: 'HappyFaceAI.com',
   name: 'Happy Face AI',
   comfyuiHost: 'http://45.18.173.26:41040', // third backend server
+  comfyuiHostClothesRemover: 'http://27.75.143.67:43691', // fourth backend server
   freeCredits: 3,
   prices: [
     {
@@ -11,9 +12,10 @@ export const appConfig = {
       price: 290, // in cents ($2.90)
       credits: 30,
       features: [
-        '30 happy face generations',
+        '30 cum face generations',
+        'or 30 clothes remover generations',
         'High-resolution outputs',
-        'Pay as you go'
+        'Pay as you go',
       ],
       isMostPopular: false,
       url: 'https://buy.stripe.com/28o1444Nx05DanS145',
@@ -26,7 +28,8 @@ export const appConfig = {
       price: 590, // in cents ($5.90)
       credits: 80,
       features: [
-        '80 happy face generations',
+        '80 cum face generations',
+        'or 80 clothes remover generations',
         'High-resolution outputs',
         'Pay as you go',
         'Save 26% per credit'
