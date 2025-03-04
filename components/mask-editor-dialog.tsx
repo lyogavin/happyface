@@ -44,6 +44,7 @@ export function MaskEditorDialog({
     if (!maskData) return undefined;
     
     const canvas = document.createElement('canvas');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const img = new (window.Image as any)();
     
     return new Promise<string>((resolve) => {
@@ -101,6 +102,7 @@ export function MaskEditorDialog({
   const handleReset = () => {
     // Create a blank white canvas and set it as the mask data
     if (setMaskData && imageUrl) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const img = new (window.Image as any)();
       img.onload = () => {
         const canvas = document.createElement('canvas');

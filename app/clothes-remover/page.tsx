@@ -677,7 +677,7 @@ export default function ClothesRemoverPage() {
           imageUrl={uploadedImage}
           title="Create Mask for Clothes Removal"
           onSave={handleSaveMask}
-          maskData={canvasData}
+          maskData={canvasData || undefined}
           setMaskData={setCanvasData}
         />
       </div>

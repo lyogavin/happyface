@@ -29,9 +29,9 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
     maskBlendMode = "normal",
     onCursorSizeChange,
     maskData,
-    onMaskDataChange,
-    onResetMask,
-    onSaveToAlpha
+    onMaskDataChange, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onResetMask, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onSaveToAlpha // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
