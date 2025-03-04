@@ -15,16 +15,18 @@ import {
   IconInfoCircle,
   IconHeart,
   IconStar,
-  IconCrown
+  IconCrown,
+  IconLock
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  className?: string
+  className?: string,
+  currentFeature: string
 }
 
-export function ClothesRemoverSidebar({ className }: SidebarProps) {
+export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProps) {
   const [activeItem, setActiveItem] = useState("clothes-remover")
 
   const sidebarItems = [
@@ -47,16 +49,16 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
       href: "/clothes-remover"
     },
     {
-      id: "history",
-      label: "My History",
-      icon: IconHistory,
-      href: "/history"
+      id: "nsfw-editor",
+      label: "NSFW Editor(Coming Soon)",
+      icon: IconLock,
+      href: "/nsfw-editor"
     },
     {
-      id: "settings",
-      label: "Settings",
-      icon: IconSettings,
-      href: "/settings"
+      id: "ai-onlyfans-creator",
+      label: "AI OnlyFans(Coming Soon)",
+      icon: IconLock,
+      href: "/ai-onlyfans-creator"
     }
   ]
 
@@ -85,15 +87,19 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
     <Sidebar className={className}>
       <div className="py-4 px-2">
         <div className="mb-2 px-4 flex items-center gap-2">
-          <Image 
-            src="/logo/logo.png" 
-            alt="Logo" 
-            width={24} 
-            height={24} 
-          />
-          <p className="text-lg font-semibold tracking-tight">
-            Cum Face AI
-          </p>
+            <Link href="/">
+              <Image 
+                src="/logo/logo.png" 
+                alt="Logo" 
+                width={24} 
+                height={24} 
+              />
+            </Link>
+            <p className="text-lg font-semibold tracking-tight">
+              <Link href="/">
+                Cum Face AI
+              </Link>
+            </p>
         </div>
         <SidebarContent className="px-2">
           {sidebarItems.map((item) => (
@@ -103,7 +109,7 @@ export function ClothesRemoverSidebar({ className }: SidebarProps) {
               onClick={() => setActiveItem(item.id)}
               className={cn(
                 "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
-                activeItem === item.id 
+                currentFeature === item.id 
                   ? "bg-accent text-accent-foreground" 
                   : "hover:bg-accent hover:text-accent-foreground"
               )}

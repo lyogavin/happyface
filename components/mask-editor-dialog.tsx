@@ -148,7 +148,7 @@ export function MaskEditorDialog({
                 </PopoverTrigger>
                 <PopoverContent className="w-[300px]">
                   <Image 
-                    src="/mask-example.webp" 
+                    src="/example-mask.webp" 
                     alt="Masking example"
                     width={300}
                     height={300}

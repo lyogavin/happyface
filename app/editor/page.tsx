@@ -238,7 +238,7 @@ export default function EditorPage() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         {/* Sidebar */}
-        <ClothesRemoverSidebar className="border-r" />
+        <ClothesRemoverSidebar className="border-r" currentFeature="cum-face-generator"/>
         
         {/* Main content area */}
         <div className="flex-1 flex flex-col">

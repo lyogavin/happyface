@@ -148,6 +148,7 @@ export default function ClothesRemoverPage() {
         }
       }
 
+
       // Use the new clothes removal specific API with the uploaded mask URL
       const jobId = await submitRemoveClothesJob(
         userId || '', 
@@ -331,7 +332,7 @@ export default function ClothesRemoverPage() {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         {/* Sidebar */}
-        <ClothesRemoverSidebar className="border-r" />
+        <ClothesRemoverSidebar className="border-r" currentFeature="clothes-remover"/>
         
         {/* Main content area */}
         <div className="flex-1 flex flex-col">
