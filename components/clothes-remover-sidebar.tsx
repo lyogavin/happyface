@@ -10,8 +10,6 @@ import {
   IconHome, 
   IconShirt, 
   IconMoodSmileDizzy,
-  IconHistory, 
-  IconSettings, 
   IconInfoCircle,
   IconHeart,
   IconStar,
@@ -27,7 +25,6 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProps) {
-  const [activeItem, setActiveItem] = useState("clothes-remover")
 
   const sidebarItems = [
     {
@@ -106,7 +103,7 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
             <Link 
               key={item.id}
               href={item.href}
-              onClick={() => setActiveItem(item.id)}
+              onClick={() => {}}
               className={cn(
                 "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                 currentFeature === item.id 
