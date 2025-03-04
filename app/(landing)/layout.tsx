@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Generate cum faces with prompts or from your own photos!",
   keywords: "AI face transformation, smile generator, happy face converter, facial expression AI, photo editing AI",
   alternates: {
-    canonical: "/",
+    canonical: "https://www.cumfaceai.com/",
   },
   openGraph: {
     title: "Cum Face AI - Generate your most preserved fantasy cum faces with AI",

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     images: ['/clothes-remover-og.png'],
   },
   alternates: {
-    canonical: "/clothes-remover",
+    canonical: "https://www.cumfaceai.com/clothes-remover",
   },
   robots: {
     index: true,

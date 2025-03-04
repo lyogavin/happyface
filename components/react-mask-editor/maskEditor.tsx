@@ -75,8 +75,8 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
       const { maxWidth, maxHeight } = getMaxDimensions();
       
       // Calculate dimensions while maintaining aspect ratio
-      let width = img.width;
-      let height = img.height;
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
       
       if (width > maxWidth) {
         const ratio = maxWidth / width;
@@ -96,10 +96,11 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
       // Draw image on canvas - IMPORTANT: Wait for next frame to ensure canvas is ready
       setTimeout(() => {
         if (canvas.current) {
-          const ctx = canvas.current.getContext('2d');
+          const ctx = canvas.current.getContext('2d', { willReadFrequently: true });
           if (ctx) {
             canvas.current.width = width;
             canvas.current.height = height;
+            ctx.clearRect(0, 0, width, height);
             ctx.drawImage(img, 0, 0, width, height);
             console.log("[MaskEditor] Image drawn on canvas");
           }
@@ -107,7 +108,7 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
         
         // Initialize mask canvas with white
         if (maskCanvas.current) {
-          const maskCtx = maskCanvas.current.getContext('2d');
+          const maskCtx = maskCanvas.current.getContext('2d', { willReadFrequently: true });
           if (maskCtx) {
             maskCanvas.current.width = width;
             maskCanvas.current.height = height;
@@ -120,13 +121,15 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
         if (cursorCanvas.current) {
           cursorCanvas.current.width = width;
           cursorCanvas.current.height = height;
+          const cursorCtx = cursorCanvas.current.getContext('2d', { willReadFrequently: true });
+          setCursorContext(cursorCtx);
         }
         
         // Initialize background canvas
         if (backgroundCanvas.current) {
           backgroundCanvas.current.width = width;
           backgroundCanvas.current.height = height;
-          const bgCtx = backgroundCanvas.current.getContext('2d');
+          const bgCtx = backgroundCanvas.current.getContext('2d', { willReadFrequently: true });
           if (bgCtx) {
             // Use a checkerboard pattern for transparency
             const tileSize = 10;
@@ -161,18 +164,23 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
   // Initialize canvases
   React.useLayoutEffect(() => {
     if (canvas.current) {
-      const ctx = canvas.current.getContext("2d");
+      const ctx = canvas.current.getContext("2d", { willReadFrequently: true });
       setContext(ctx);
     }
     
     if (maskCanvas.current) {
-      const ctx = maskCanvas.current.getContext("2d");
+      const ctx = maskCanvas.current.getContext("2d", { willReadFrequently: true });
       setMaskContext(ctx);
     }
     
     if (cursorCanvas.current) {
-      const ctx = cursorCanvas.current.getContext("2d");
+      const ctx = cursorCanvas.current.getContext("2d", { willReadFrequently: true });
       setCursorContext(ctx);
+    }
+    
+    if (backgroundCanvas.current) {
+      const ctx = backgroundCanvas.current.getContext("2d", { willReadFrequently: true });
+      setBackgroundContext(ctx);
     }
   }, []);
 
