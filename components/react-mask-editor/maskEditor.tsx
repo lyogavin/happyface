@@ -69,51 +69,104 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
     img.onload = () => {
       console.log("[MaskEditor] Image loaded successfully:", {
         naturalWidth: img.naturalWidth,
-        naturalHeight: img.naturalHeight
+        naturalHeight: img.naturalHeight,
+        complete: img.complete
       });
       
+      // Debug: Print image data
+      try {
+        // Create a temporary canvas to extract image data
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = Math.min(img.naturalWidth, 100);
+        tempCanvas.height = Math.min(img.naturalHeight, 100);
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        if (tempCtx) {
+          // Draw a portion of the image
+          tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+          
+          // Get image data
+          const imageData = tempCtx.getImageData(0, 0, 10, 10);
+          
+          // Log the first few pixels
+          console.log("[MaskEditor] Image pixels:", imageData.data.slice(0, 40));
+        }
+      } catch (error) {
+        console.error("[MaskEditor] Error extracting image data for debugging:", error);
+      }
+      
       const { maxWidth, maxHeight } = getMaxDimensions();
+      console.log("[MaskEditor] Max dimensions:", { maxWidth, maxHeight });
       
       // Calculate dimensions while maintaining aspect ratio
-      let width = img.naturalWidth;
-      let height = img.naturalHeight;
+      // Using the approach from the working version
+      const scaleWidth = maxWidth / img.naturalWidth;
+      const scaleHeight = maxHeight / img.naturalHeight;
+      const scale = Math.min(1, scaleWidth, scaleHeight);
       
-      if (width > maxWidth) {
-        const ratio = maxWidth / width;
-        width = maxWidth;
-        height = height * ratio;
-      }
+      // Ensure minimum dimensions
+      const minWidth = 200;
+      const minHeight = 200;
+      const width = Math.max(minWidth, Math.floor(img.naturalWidth * scale));
+      const height = Math.max(minHeight, Math.floor(img.naturalHeight * scale));
       
-      if (height > maxHeight) {
-        const ratio = maxHeight / height;
-        height = maxHeight;
-        width = width * ratio;
-      }
+      console.log("[MaskEditor] Calculated dimensions:", { 
+        width, 
+        height, 
+        scale,
+        scaleWidth,
+        scaleHeight
+      });
       
       // Set canvas size
       setSize({ x: width, y: height });
       
-      // Draw image on canvas - IMPORTANT: Wait for next frame to ensure canvas is ready
+      // Use a slightly longer timeout to ensure the canvas is ready
       setTimeout(() => {
         if (canvas.current) {
+          console.log("[MaskEditor] Canvas exists, attempting to draw");
           const ctx = canvas.current.getContext('2d', { willReadFrequently: true });
           if (ctx) {
-            canvas.current.width = width;
-            canvas.current.height = height;
-            ctx.clearRect(0, 0, width, height);
-            ctx.drawImage(img, 0, 0, width, height);
-            console.log("[MaskEditor] Image drawn on canvas");
+            try {
+              canvas.current.width = width;
+              canvas.current.height = height;
+              console.log("[MaskEditor] Canvas dimensions set:", canvas.current.width, "x", canvas.current.height);
+              
+              // Clear the canvas first
+              ctx.clearRect(0, 0, width, height);
+              
+              // IMPORTANT: Draw the image
+              ctx.drawImage(img, 0, 0, width, height);
+              console.log("[MaskEditor] Drew image on canvas successfully");
+              
+              // Debug: Check canvas pixels after drawing
+              const canvasData = ctx.getImageData(0, 0, 10, 10);
+              console.log("[MaskEditor] Canvas pixels after drawing:", canvasData.data.slice(0, 40));
+              
+              // Draw a small red rectangle in the corner for debugging
+              ctx.fillStyle = 'red';
+              ctx.fillRect(0, 0, 10, 10);
+            } catch (error) {
+              console.error("[MaskEditor] Error drawing image on canvas:", error);
+            }
+          } else {
+            console.error("[MaskEditor] Failed to get canvas context");
           }
+        } else {
+          console.error("[MaskEditor] Canvas not available for drawing");
         }
         
-        // Initialize mask canvas with white
+        // Initialize mask canvas with white (or black based on working version)
         if (maskCanvas.current) {
           const maskCtx = maskCanvas.current.getContext('2d', { willReadFrequently: true });
           if (maskCtx) {
             maskCanvas.current.width = width;
             maskCanvas.current.height = height;
-            maskCtx.fillStyle = "#ffffff";
-            maskCtx.fillRect(0, 0, width, height);  
+            maskCtx.fillStyle = "#ffffff";  // White background for mask
+            maskCtx.fillRect(0, 0, width, height);
+            setMaskContext(maskCtx);
+          } else {
+            console.error("[MaskEditor] Failed to get mask canvas context");
           }
         }
         
@@ -125,7 +178,7 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
           setCursorContext(cursorCtx);
         }
         
-        // Initialize background canvas
+        // Initialize background canvas with checkerboard pattern
         if (backgroundCanvas.current) {
           backgroundCanvas.current.width = width;
           backgroundCanvas.current.height = height;
@@ -139,11 +192,12 @@ export const MaskEditor: React.FC<MaskEditorProps> = (props) => {
                 bgCtx.fillRect(x, y, tileSize, tileSize);
               }
             }
+            setBackgroundContext(bgCtx);
           }
         }
         
         setImageLoaded(true);
-      }, 0);
+      }, 50);  // Increased timeout to 50ms
     };
     
     img.onerror = (e) => {
