@@ -23,9 +23,9 @@ export async function Blog({ slugs }: { slugs?: string[] }) {
               CrazyFace AI Blog
             </h2>
           ) : (
-            <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
               CrazyFace AI Blog
-            </h1>
+            </h2>
           )}
           <p className="mt-4 text-xl text-muted-foreground">
             Posts about getting your perfect facial expressions and selfies

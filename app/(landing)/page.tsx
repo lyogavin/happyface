@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity } from "@tabler/icons-react"
 import PricingSection from "@/components/pricing-section"
 import { GetCreditsButton } from "@/components/get-credits-button"
+import { Blog } from "@/components/blog/blog"
 
 export default function LandingPage() {
   return (
@@ -256,6 +257,23 @@ export default function LandingPage() {
 
         {/* Pricing Section */}
         <PricingSection />
+
+        {/* Blog Section */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <Blog />
+            
+            <div className="mt-12 text-center">
+              <Button asChild variant="outline" size="lg">
+                <Link href="/blog">
+                  View All Articles
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <footer className="bg-gray-800 text-white py-8">
