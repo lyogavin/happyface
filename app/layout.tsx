@@ -7,6 +7,14 @@ import type React from "react" // Import React
 import { PostHogProvider } from './providers'
 const inter = Inter({ subsets: ["latin"] })
 
+// Add metadata export
+export const metadata = {
+  metadataBase: new URL("https://www.cumfaceai.com"),
+  alternates: {
+    canonical: "/",
+  },
+}
+
 export default function RootLayout({
   children,
 }: {

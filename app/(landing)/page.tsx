@@ -126,23 +126,23 @@ export default function LandingPage() {
               {[
                 {
                   icon: IconDragDrop,
-                  title: "Easy-to-Use Editor",
-                  description: "Simply upload an image, choose from a variety of cumshot stickers, and customize to your liking.",
+                  title: "Text & Image Input",
+                  description: "Support for both text-to-image and image-to-image generation to create cum face for your photo or model description.",
                 },
                 {
                   icon: IconWand,
-                  title: "Personalized Creations",
-                  description: "Craft your own fantasy scenarios using a wide array of customizable sticker options.",
+                  title: "High Quality Results",
+                  description: "Generate the most natural and realistic cum face images with advanced AI technology.",
                 },
                 {
                   icon: IconSticker,
-                  title: "Unique Stickers",
-                  description: "Choose from over 200 unique cumshot designs along with other suggestive stickers.",
+                  title: "All about Controllability",
+                  description: "Highly controllable settings to adjust the level of orgasm face and cum face intensity.",
                 },
                 {
                   icon: IconInfinity,
-                  title: "100% Free Access",
-                  description: "Enjoy unlimited access to the generator without any sign-ups or payments.",
+                  title: "Free Access",
+                  description: "Offers a free tier for you to try out the features before upgrading.",
                 },
               ].map((feature, index) => (
                 <div key={index} className="p-6 bg-gray-50 rounded-lg">
@@ -205,21 +205,28 @@ export default function LandingPage() {
         {/* Featured On Section */}
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-extrabold text-center mb-8">Featured On</h2>
-            <div className="flex justify-center">
+            <h2 className="text-3xl font-extrabold text-center mb-8">Recommended by</h2>
+            <div className="flex flex-col items-center">
+              <div className="mb-4 text-center">
+                <p className="text-lg font-semibold text-gray-700 mb-2">Featured in</p>
+                <p className="text-xl font-bold text-purple-600">&ldquo;21 Best Cum Face Generator AI - 2025&rdquo;</p>
+              </div>
               <a 
                 id="verification-aitoolhunt" 
                 data-verify-aitoolhunt="102606411717093946378" 
-                href="https://www.aitoolhunt.com/tool/cumfaceai.com?utm_medium=featured&utm_source=cumfaceai.com" 
+                href="https://www.aitoolhunt.com/?search=cum-face-generator-ai" 
                 target="_blank"
                 rel="noopener noreferrer"
+                className="flex flex-col items-center"
               >
                 <Image 
                   width={224}
                   height={50}
                   src="https://www.aitoolhunt.com/images/featured-light.png?a=1" 
                   alt="Featured on AI Tool Hunt"
+                  className="mb-2"
                 />
+                <span className="text-sm text-gray-600 hover:text-purple-600 transition-colors">View the full list</span>
               </a>
             </div>
           </div>

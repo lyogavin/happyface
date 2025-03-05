@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  transpilePackages: ['next-mdx-remote'],
+  output: "standalone",
+  experimental: {
+    serverComponentsExternalPackages: ["shiki"],
+    outputFileTracingIncludes: {
+      '/': ['./content/**/*'],
+    },
+  } as any,
   images: {
     remotePatterns: [
       // ... existing patterns ...
@@ -14,6 +22,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'www.aitoolhunt.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
         port: '',
         pathname: '/**',
       },

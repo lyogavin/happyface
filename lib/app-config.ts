@@ -1,6 +1,9 @@
 export const appConfig = {
   appName: 'HappyFaceAI.com',
   name: 'Happy Face AI',
+  description: 'Generate images of cum faces and clothes remover images with AI. Cum face generator. AI Clothes remover',
+  keywords: ['cum face', 'clothes remover', 'AI', 'image generation', 'funny images', 'memes', 'cum face generator', 'AI clothes remover'],
+  url: process.env.NEXT_PUBLIC_APP_URL || "https://cumfaceai.com",
   comfyuiHost: 'http://45.18.173.26:41040', // third backend server
   comfyuiHostClothesRemover: 'http://27.75.143.67:43691', // fourth backend server
   freeCredits: 3,
