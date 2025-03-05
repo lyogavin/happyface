@@ -1,9 +1,17 @@
 import Image from 'next/image'
-import { generateImageList, ImageData } from '@/lib/blog'
+import { ImageData } from '@/lib/blog'
 
 
-export function ImageFeed({ path }: { path: string }) {
-  const images: ImageData[] = generateImageList(path)
+export function ImageFeed({ list }: { list: string }) {
+  // split the list by commas
+  const images: ImageData[] = list.split(',').map((image) => ({
+    id: image,
+    src: image,
+    alt: image.split("/").pop()?.split(".")[0] || "",
+    width: 400,
+    height: 400,
+    title: image.split("/").pop()?.split(".")[0] || "",
+  }))
   console.log(images)
   return (
     <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
