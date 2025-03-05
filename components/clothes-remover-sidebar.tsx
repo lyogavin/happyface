@@ -17,6 +17,14 @@ import {
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription 
+} from "@/components/ui/dialog"
+import React from "react"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string,
@@ -24,6 +32,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProps) {
+  const [showComingSoonDialog, setShowComingSoonDialog] = React.useState(false);
 
   const sidebarItems = [
     {
@@ -48,13 +57,13 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
       id: "nsfw-editor",
       label: "NSFW Editor(Coming Soon)",
       icon: IconLock,
-      href: "/nsfw-editor"
+      href: ""
     },
     {
       id: "ai-onlyfans-creator",
       label: "AI OnlyFans(Coming Soon)",
       icon: IconLock,
-      href: "/ai-onlyfans-creator"
+      href: ""
     }
   ]
 
@@ -101,8 +110,13 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
           {sidebarItems.map((item) => (
             <Link 
               key={item.id}
-              href={item.href}
-              onClick={() => {}}
+              href={item.href || "#"}
+              onClick={(e) => {
+                if (!item.href) {
+                  e.preventDefault();
+                  setShowComingSoonDialog(true);
+                }
+              }}
               className={cn(
                 "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                 currentFeature === item.id 
@@ -163,6 +177,19 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
           </Button>
         </div>
       </div>
+      
+      {/* Coming Soon Dialog */}
+      <Dialog open={showComingSoonDialog} onOpenChange={setShowComingSoonDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Feature Coming Soon</DialogTitle>
+            <DialogDescription className="pt-4">
+              <p className="mb-4">This feature is being developed. Please wait patiently.</p>
+              <p>Any other questions? Please email us: <a href="mailto:gavinli@animaai.cloud" className="text-blue-500 hover:underline">gavinli@animaai.cloud</a></p>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   )
 } 

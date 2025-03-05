@@ -202,6 +202,28 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Video Demo Section */}
+        <section className="py-20 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-extrabold text-center mb-8">See It In Action</h2>
+            <p className="text-xl text-center text-gray-600 max-w-3xl mx-auto mb-12">
+              Watch our AI in action as it transforms ordinary images into stunning cum face creations.
+            </p>
+            <div className="max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl">
+              <video 
+                className="w-full aspect-video" 
+                controls 
+                poster="/how-it-works.png"
+                muted 
+                loop
+              >
+                <source src="https://ritdyhnvqjzooqc3.public.blob.vercel-storage.com/0204-fiBcevMbLHNPH4g1vzCteXXZX94gsr.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        </section>
+
         {/* Featured On Section */}
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">

@@ -58,6 +58,7 @@ export function ClothesRemoverLanding() {
               poster="/clothes-remover-demo-Cover.jpg"
               controls
               preload="none"
+              muted
             ></video>
           </div>
           <p className="text-center text-gray-500 mt-4">Watch our demo to see how easy it is to use our AI Clothes Remover</p>

@@ -10,6 +10,7 @@ export default function Video({ url, thumbnail }: { url: string, thumbnail: stri
  
 async function VideoComponent({ url, thumbnail }: { url: string, thumbnail: string }) {
   return (
+    <>
     <video 
       controls 
       preload="none" 
@@ -21,5 +22,6 @@ async function VideoComponent({ url, thumbnail }: { url: string, thumbnail: stri
       <source src={url} type="video/mp4" />
       Your browser does not support the video tag.
     </video>
+    </>
   )
 }
