@@ -1,5 +1,4 @@
 import React from "react";
-import { CtaSection } from "@/components/cta";
 import { Post } from "@/lib/blog";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
@@ -64,7 +63,6 @@ export default async function BlogPage({
               {children}
             </div>
 
-            <CtaSection />
           </div>
         </div>
       </div>

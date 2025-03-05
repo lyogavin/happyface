@@ -9,6 +9,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 //import rehypePrettyCode from "rehype-pretty-code";
 import { Button } from '@/components/ui/button'
 import { ImageFeed } from '@/components/blog/image-feed'
+import { CtaSection } from '@/components/blog/blog-cta'
 import Video from '@/components/blog/video'
 import Link from 'next/link'
 
@@ -28,6 +29,7 @@ const components = {
   ImageFeed,
   Video,
   Link,
+  CtaSection,
   // Add other components you want to use in MDX here
 }
 

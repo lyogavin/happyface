@@ -15,5 +15,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: 'https://www.cumfaceai.com/blog/how-to-generate-cum-face-easy-2025',
       lastModified: new Date(),
     },
+    {
+      url: 'https://www.cumfaceai.com/blog/how-to-remove-clothes-with-ai-2025',
+      lastModified: new Date(),
+    },
   ]
 }
