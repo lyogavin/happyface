@@ -69,16 +69,56 @@ export async function POST(req: NextRequest) {
         });
 
         // Replace the direct update with RPC call
-        const { error: rpcError } = await supabaseClient
-          .rpc('add_credits', {
-            p_clerk_id: userId,
-            p_credits: creditsToAdd
-          });
+        let attempts = 0;
+        const maxAttempts = 3;
+        let data;
+        let rpcError;
+
+        while (attempts < maxAttempts) {
+          attempts++;
+          
+          const result = await supabaseClient
+            .rpc('add_credits', {
+              p_clerk_id: userId,
+              p_credits: creditsToAdd
+            });
+          
+          data = result.data;
+          rpcError = result.error;
+          
+          if (!rpcError) {
+            break; // Success, exit the retry loop
+          }
+          
+          console.log(`RPC attempt ${attempts} failed, retrying...`, rpcError);
+          
+          if (attempts < maxAttempts) {
+            // Exponential backoff: 500ms, 1000ms, 2000ms, etc.
+            await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, attempts - 1)));
+          }
+        }
 
         if (rpcError) {
-          console.error('Error adding credits:', rpcError);
+          console.error(`Error adding credits after ${attempts} attempts:`, rpcError);
           return NextResponse.json({ error: 'Error adding credits' }, { status: 500 });
         }
+
+        // Check the result from the RPC call
+        // The RPC returns a query result with rows containing [success, new_balance, error_message]
+        if (!data || data.length === 0) {
+          console.error('Unexpected empty response from add_credits RPC');
+          return NextResponse.json({ error: 'Unexpected response from server' }, { status: 500 });
+        }
+
+        // Based on the RPC definition, we get a row with [success, new_balance, error_message]
+        const { success, new_balance, error_message } = data[0];
+        
+        if (!success) {
+          console.error('Failed to add credits:', error_message);
+          return NextResponse.json({ error: error_message || 'Failed to add credits' }, { status: 400 });
+        }
+        
+        console.log(`Successfully added ${creditsToAdd} credits. New balance: ${new_balance}`);
       }
       break;
 
