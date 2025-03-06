@@ -68,6 +68,21 @@ export async function POST(req: NextRequest) {
           publicMetadata: { stripe_email: session.customer_email },
         });
 
+        // get user clerk email
+        const user = await clerkClient.users.getUser(userId);
+        const clerkEmail = user.emailAddresses[0].emailAddress;
+
+        // update user in supabase
+        const { error } = await supabaseClient
+          .from('happyface_users')
+          .update({ clerk_email: clerkEmail, stripe_id: stripeId, stripe_email: session.customer_email })
+          .eq('clerk_id', userId);
+
+        if (error) {
+          // if error, don't stop, continue...
+          console.warn('Error updating user in supabase:', error);
+        }
+
         // Replace the direct update with RPC call
         let attempts = 0;
         const maxAttempts = 3;
