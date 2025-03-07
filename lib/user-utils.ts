@@ -3,6 +3,7 @@
 import { Stripe } from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import appConfig from '@/lib/app-config';
+import { checkHappyFaceStatus } from './generate-happyface';
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const supabaseClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
@@ -40,7 +41,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
     return { 
       status: 'active',
       type: 'pro',
-      credits: 0
+      credits: 1000
     };
   }
 
@@ -101,19 +102,33 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   };
 };
 
-export const getUserGenerations = async (user_id: string, feature: string) => {
+export type UserGeneration = {
+  generation: string;
+  upload_image: string;
+  comfyui_prompt_id: string;
+  comfyui_server: string;
+  prompt: string;
+}
+
+export const getUserGenerations = async (user_id: string, feature: string, limit: number = 20): Promise<UserGeneration[]> => {
   const { data, error } = await supabaseClient
     .from('happyface_generations')
-    .select('generation')
+    .select('generation, upload_image, comfyui_prompt_id, comfyui_server, prompt')
     .eq('user_id', user_id)
     .eq('feature', feature)
     .order('created_at', { ascending: false })
-    .limit(20); // Limit to most recent 20 generations
+    .limit(limit); // Limit to most recent 20 generations
 
   if (error) {
     console.error("Error fetching user generations:", error);
     return [];
   }
 
-  return data.map(generation => generation.generation);
+  return data.map(generation => ({
+    generation: generation.generation,
+    upload_image: generation.upload_image,
+    comfyui_prompt_id: generation.comfyui_prompt_id,
+    comfyui_server: generation.comfyui_server,
+    prompt: generation.prompt
+  }));
 };

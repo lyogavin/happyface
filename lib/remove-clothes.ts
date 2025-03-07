@@ -39,117 +39,274 @@ export async function submitRemoveClothesJob(
   workflow[46].inputs.url_or_path = maskImageUrl;
   
   // Set prompt
-  const defaultPrompt = "top fully naked girl";
+  const defaultPrompt = "fully naked, fully nude, no clothes";
   workflow[23].inputs.text = prompt || defaultPrompt;
   
-  // Submit the job to ComfyUI
-  const response = await fetch(`${COMFY_API_HOST}/prompt`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      prompt: workflow,
-      client_id: crypto.randomUUID(),
-    }),
-  });
+  // Add retry logic for submitting the job to ComfyUI
+  const MAX_RETRIES = 3;
+  let retryCount = 0;
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    console.error('Failed to submit ComfyUI job', response);
-    throw new Error('Failed to submit ComfyUI job');
+  while (retryCount < MAX_RETRIES) {
+    try {
+      // Submit the job to ComfyUI with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      const response = await fetch(`${COMFY_API_HOST}/prompt`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: workflow,
+          client_id: crypto.randomUUID(),
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Failed to submit ComfyUI job: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('ComfyUI job submitted, data', data);
+
+      // after submit, fill db with the job id and comfyui server address
+      const { error: dbError } = await supabase.from('happyface_generations').insert({
+        user_id: userId,
+        prompt: prompt || defaultPrompt,
+        upload_image: sourceImageUrl,
+        mask_image: maskImageUrl,
+        comfyui_prompt_id: data.prompt_id,
+        comfyui_server: COMFY_API_HOST,
+        feature: 'clothes-remover',
+      });
+      
+      if (dbError) {
+        console.error('Failed to insert into happyface_generations', dbError);
+      }
+
+      return data.prompt_id;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      retryCount++;
+      
+      console.error(`Failed to submit ComfyUI job (attempt ${retryCount}/${MAX_RETRIES}):`, lastError.message);
+      
+      if (retryCount < MAX_RETRIES) {
+        // Exponential backoff: wait longer between each retry
+        const backoffTime = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+        console.log(`Retrying job submission in ${backoffTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, backoffTime));
+      }
+    }
   }
 
-  const data = await response.json();
-  console.log('ComfyUI job submitted, data', data);
-  return data.prompt_id;
+  // If we've exhausted all retries, throw the last error
+  if (lastError) {
+    console.error('Exhausted all retries for ComfyUI job submission');
+    throw new Error(`Failed to submit ComfyUI job after ${MAX_RETRIES} attempts: ${lastError.message}`);
+  }
+  
+  // This should never be reached, but TypeScript requires a return
+  throw new Error('Unexpected error in job submission');
 }
 
 export async function checkRemoveClothesStatus(jobId: string, userId: string, sourceImageUrl: string, prompt: string): Promise<ComfyUIProgress> {
-  const response = await fetch(`${COMFY_API_HOST}/history/${jobId}`);
-  
-  if (!response.ok) {
-    console.error('Failed to check job status', response);
-    throw new Error('Failed to check job status');
-  }
-
-  const data = await response.json();
-  
-  // Check if job is completed - node 9 is the SaveImage node in this workflow
-  if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[9]?.images?.[0]) {
-    const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[9].images[0].filename}`;
-    
-    // Download the image from ComfyUI
-    const startTime = new Date();
-    const imageData = await downloadImage(comfyUrl);
-    const endTime = new Date();
-    const downloadTime = endTime.getTime() - startTime.getTime();
-    console.log('Download time', downloadTime);
-    
-    // Upload to Supabase with UUID filename
-    const fileName = `${crypto.randomUUID()}.${imageData.mimeType.split('/')[1]}`;
-    const filePath = `public/removeclothes/${fileName}`;
-    
-    // log upload time
-    const uploadStartTime = new Date();
-    const { error } = await supabase.storage
-      .from('images')
-      .upload(filePath, imageData.blob, {
-        contentType: imageData.mimeType,
-        upsert: true
-      });
-    const uploadEndTime = new Date();
-    const uploadTime = uploadEndTime.getTime() - uploadStartTime.getTime();
-    console.log('Upload time', uploadTime);
-    if (error) {
-      console.error('Failed to upload to Supabase', error);
-      throw new Error(`Failed to upload to Supabase: ${error.message}`);
-    }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('images')
-      .getPublicUrl(filePath);
-
-    // log handle remove clothes generation time
-    const handleStartTime = new Date();
-    // call supabase rpc to save result and decrease credits
-    const { error: rpcError } = await supabase.rpc('handle_clothes_remover', {
-      p_user_id: userId,
-      p_source_image_url: sourceImageUrl,
-      p_prompt: prompt,
-      p_result_image_url: publicUrl
+  try {
+    // Check queue status first
+    const queueResponse = await fetch(`${COMFY_API_HOST}/queue`, {
+      signal: AbortSignal.timeout(15000) // 15 seconds timeout
     });
-    const handleEndTime = new Date();
-    const handleTime = handleEndTime.getTime() - handleStartTime.getTime();
-    console.log('Handle remove clothes time', handleTime);
-    if (rpcError) {
-      console.error('Failed to handle remove clothes generation', rpcError);
-      throw new Error('Failed to handle remove clothes generation: ' + rpcError.message);
+    
+    if (!queueResponse.ok) {
+      console.error('Failed to check queue status', queueResponse);
+      return {
+        status: 'processing',
+        progress: 0,
+        currentStep: 'Processing'
+      };
+    }
+    
+    const queueData = await queueResponse.json();
+    
+    // Check if job is in queue
+    const isInRunningQueue = queueData.queue_running.some(
+      (item: any[]) => item[1] === jobId
+    );
+    const isInPendingQueue = queueData.queue_pending.some(
+      (item: any[]) => item[1] === jobId
+    );
+
+    if (isInRunningQueue) {
+      return {
+        status: 'processing',
+        progress: 50,
+        currentStep: 'Processing'
+      };
     }
 
-    console.log('Total time', downloadTime + uploadTime + handleTime, 'returning:', publicUrl);
+    if (isInPendingQueue) {
+      return {
+        status: 'pending',
+        progress: 10,
+        currentStep: 'Waiting in queue'
+      };
+    }
+
+    // If not in queue, check history as before
+    const response = await fetch(`${COMFY_API_HOST}/history/${jobId}`, {
+      // Add timeout options to prevent hanging indefinitely
+      signal: AbortSignal.timeout(15000) // 15 seconds timeout
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to check job status', response);
+
+      // when there's unknown error, return 'processing' as we don't know the status of the server
+      return {
+        status: 'processing',
+        progress: 0,
+        currentStep: 'Processing'
+      };
+    }
+
+    const data = await response.json();
+    
+    // Check if job is completed - node 9 is the SaveImage node in this workflow
+    if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[9]?.images?.[0]) {
+      const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[9].images[0].filename}`;
+      
+      // Add retry logic for the job completed case
+      const MAX_RETRIES = 3;
+      let retryCount = 0;
+      let lastError: unknown = null;
+
+      while (retryCount < MAX_RETRIES) {
+        try {
+          // Download the image from ComfyUI
+          const startTime = new Date();
+          const imageData = await downloadImage(comfyUrl);
+          const endTime = new Date();
+          const downloadTime = endTime.getTime() - startTime.getTime();
+          console.log('Download time', downloadTime);
+          
+          // Upload to Supabase with UUID filename
+          const fileName = `${crypto.randomUUID()}.${imageData.mimeType.split('/')[1]}`;
+          const filePath = `public/removeclothes/${fileName}`;
+          
+          // log upload time
+          const uploadStartTime = new Date();
+          const { error } = await supabase.storage
+            .from('images')
+            .upload(filePath, imageData.blob, {
+              contentType: imageData.mimeType,
+              upsert: true
+            });
+          const uploadEndTime = new Date();
+          const uploadTime = uploadEndTime.getTime() - uploadStartTime.getTime();
+          console.log('Upload time', uploadTime);
+          
+          if (error) {
+            throw new Error(`Failed to upload to Supabase: ${error.message}`);
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(filePath);
+
+          // log handle remove clothes generation time
+          const handleStartTime = new Date();
+          // call supabase rpc to save result and decrease credits
+          const { error: rpcError } = await supabase.rpc('handle_clothes_remover', {
+            p_user_id: userId,
+            p_source_image_url: sourceImageUrl,
+            p_prompt: prompt,
+            p_result_image_url: publicUrl,
+            p_comfyui_prompt_id: jobId,
+          });
+          const handleEndTime = new Date();
+          const handleTime = handleEndTime.getTime() - handleStartTime.getTime();
+          console.log('Handle remove clothes time', handleTime);
+          
+          if (rpcError) {
+            throw new Error(`Failed to handle remove clothes generation: ${rpcError.message}`);
+          }
+
+          console.log('Total time', downloadTime + uploadTime + handleTime, 'returning:', publicUrl);
+
+          return {
+            status: 'completed',
+            progress: 100,
+            url: publicUrl
+          };
+        } catch (error: unknown) {
+          lastError = error;
+          retryCount++;
+          
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+          console.error(`Error processing completed image (attempt ${retryCount}/${MAX_RETRIES}):`, errorMessage);
+          
+          if (retryCount < MAX_RETRIES) {
+            // Exponential backoff: wait longer between each retry
+            const backoffTime = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+            console.log(`Retrying in ${backoffTime}ms...`);
+            await new Promise(resolve => setTimeout(resolve, backoffTime));
+          }
+        }
+      }
+      
+      // If we've exhausted all retries, return an error
+      const errorMessage = lastError instanceof Error ? lastError.message : 'Unknown error occurred';
+      console.error('Exhausted all retries for processing completed image:', errorMessage);
+      return {
+        status: 'error',
+        progress: 0,
+        currentStep: `Error processing the completed image after ${MAX_RETRIES} attempts: ${errorMessage}`
+      };
+    }
+    
+    // If job is still processing
+    if (!data[jobId]?.executing) {
+      return {
+        status: 'processing',
+        progress: 20,
+        currentStep: 'Processing'
+      };
+    }
 
     return {
-      status: 'completed',
-      progress: 100,
-      url: publicUrl
+      status: 'processing',
+      progress: 20,
+      currentStep: 'Processing'
     };
-  }
-  
-  // If job is still processing
-  if (!data[jobId]?.executing) {
+  } catch (error: unknown) {
+    // Handle connection timeout and other network errors
+    console.error('Error checking Remove Clothes status:', error);
+    
+    // Check if it's a timeout error
+    const isTimeoutError = 
+      (error instanceof Error && error.name === 'AbortError') || 
+      (error instanceof Error && 'code' in error && (error as NodeJS.ErrnoException).code === 'UND_ERR_CONNECT_TIMEOUT') ||
+      (error instanceof Error && error.cause && 
+       typeof error.cause === 'object' && 'code' in error.cause && 
+       (error.cause as NodeJS.ErrnoException).code === 'UND_ERR_CONNECT_TIMEOUT');
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+
+    // for unknown error or timeout error, return 'processing' as we don't know the status of the server
     return {
       status: 'processing',
       progress: 0,
-      currentStep: 'Processing'
+      currentStep: isTimeoutError 
+        ? 'Connection timeout: The server is taking too long to respond. Please try again later.'
+        : `Error checking job status: ${errorMessage}`
     };
   }
-
-  return {
-    status: 'processing',
-    progress: 20,
-    currentStep: 'Processing'
-  };
 }
 
 // Helper functions
@@ -208,7 +365,7 @@ type DownloadedImage = {
 };
 
 type ComfyUIProgress = {
-  status: 'completed' | 'processing' | 'error';
+  status: 'completed' | 'processing' | 'pending' | 'error';
   progress: number;
   currentStep?: string;
   url?: string;

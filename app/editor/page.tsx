@@ -27,7 +27,7 @@ import {
 import { Slider } from "@/components/ui/slider"
 import { toast } from "@/hooks/use-toast"
 import { useUser } from "@clerk/nextjs"
-import { getUserGenerations } from "@/lib/user-utils"
+import { getUserGenerations, UserGeneration } from "@/lib/user-utils"
 import posthog from 'posthog-js'
 import Link from "next/link"
 import { ProfileMenu } from "@/app/components/ProfileMenu"
@@ -42,42 +42,124 @@ export default function EditorPage() {
   const [prompt, setPrompt] = useState("")
   const [currentImage, setCurrentImage] = useState<string | null>(null)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [historicalImages, setHistoricalImages] = useState<string[]>([])
+  const [historicalImages, setHistoricalImages] = useState<UserGeneration[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [showCreditDialog, setShowCreditDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cumStrength, setCumStrength] = useState(1.0)
   const [orgasmStrength, setOrgasmStrength] = useState(1.0)
   const [progress, setProgress] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [generationStatus, setGenerationStatus] = useState<'idle' | 'pending' | 'processing' | 'completed' | 'error'>('idle')
 
   // Add useEffect to load historical generations
   useEffect(() => {
     const loadHistoricalGenerations = async () => {
       if (user?.id) {
         try {
-          const generations = await getUserGenerations(user.id, 'cum-face');
-          setHistoricalImages(generations);
+          setIsLoading(true)
+          // if local limit 5, otherwise 20
+          // check if it's from localhost
+          const isLocal = window.location.hostname === 'localhost';
+          const generations = await getUserGenerations(user.id, 'cum-face', isLocal ? 5 : 20);
+          
+          // Set the historical images first
+          setHistoricalImages(generations)
+          setIsLoading(false)
+          
+          // Filter out incomplete generations that need checking
+          const incompleteGenerations = generations.filter(
+            gen => !gen.generation && gen.comfyui_prompt_id
+          );
+          
+          if (incompleteGenerations.length > 0) {
+            console.log(`Found ${incompleteGenerations.length} incomplete generations to check`);
+            // Check these incomplete generations directly
+            checkIncompleteGenerations(user.id, incompleteGenerations);
+          }
         } catch (error) {
-          console.error("Failed to load historical generations:", error);
+          console.error("Failed to load historical generations:", error)
           toast({
             title: "Error",
             description: "Failed to load your previous generations",
             variant: "destructive",
-          });
+          })
+          setIsLoading(false)
         }
       }
-    };
+    }
 
     if (isLoaded && user) {
-      loadHistoricalGenerations();
+      loadHistoricalGenerations()
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user])
+
+  // Function to check incomplete generations without relying on state
+  const checkIncompleteGenerations = async (
+    userId: string, 
+    incompleteGenerations: UserGeneration[]
+  ) => {
+    if (incompleteGenerations.length === 0) return;
+    
+    console.log(`Checking ${incompleteGenerations.length} incomplete generations...`);
+    
+    // Track which generations were updated
+    const updatedGenerationIds: string[] = [];
+    
+    // Check each incomplete generation
+    await Promise.all(
+      incompleteGenerations.map(async (gen) => {
+        if (!gen.comfyui_prompt_id) return;
+        
+        try {
+          // Call checkHappyFaceStatus to get the result
+          const status = await checkHappyFaceStatus(
+            gen.comfyui_prompt_id,
+            userId,
+            gen.upload_image,
+            gen.prompt || ''
+          );
+          
+          // If the generation is completed, update it
+          if (status.status === 'completed' && status.url) {
+            console.log(`Generation ${gen.comfyui_prompt_id} completed!`);
+            updatedGenerationIds.push(gen.comfyui_prompt_id);
+            
+            // Update our local state to reflect the change
+            setHistoricalImages(prev => 
+              prev.map(prevGen => 
+                prevGen.comfyui_prompt_id === gen.comfyui_prompt_id
+                  ? { ...prevGen, generation: status.url || '' }
+                  : prevGen
+              )
+            );
+          }
+        } catch (error) {
+          console.error(`Error checking generation ${gen.comfyui_prompt_id}:`, error);
+        }
+      })
+    );
+    
+    // Get the generations that are still incomplete
+    const stillIncompleteGenerations = incompleteGenerations.filter(
+      gen => gen.comfyui_prompt_id && !updatedGenerationIds.includes(gen.comfyui_prompt_id)
+    );
+    
+    // If there are still incomplete generations, check again after a delay
+    if (stillIncompleteGenerations.length > 0) {
+      console.log(`${stillIncompleteGenerations.length} generations still incomplete, checking again in 3 seconds...`);
+      setTimeout(() => checkIncompleteGenerations(userId, stillIncompleteGenerations), 3000);
+    } else {
+      console.log('All generations are now complete!');
+    }
+  };
 
   const handlePromptSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsGenerating(true)
     setError(null)
-    const startTime = new Date()
+    setGenerationStatus('idle')
+    let startTime = new Date()
     console.log(`Generation started at: ${startTime.toISOString()}`)
 
     try {
@@ -119,17 +201,42 @@ export default function EditorPage() {
             console.log(`Total generation time: ${totalTimeSeconds.toFixed(1)} seconds`)
             
             setCurrentImage(result.url)
-            setHistoricalImages((prev) => [result.url!, ...prev])
+            setHistoricalImages((prev) => [...prev, 
+              { 
+                generation: result.url!,
+                upload_image: uploadedImage || '', 
+                comfyui_prompt_id: jobId, 
+                comfyui_server: '', 
+                prompt: prompt 
+              }
+            ])
             setIsGenerating(false)
             setProgress(0)
+            setGenerationStatus('completed')
             toast({
               title: "Success!",
               description: "Your happy face has been generated.",
             })
           } else if (result.status === 'error') {
             posthog.capture('generation_error', {'error': result})
+            setGenerationStatus('error')
             throw new Error('Failed to generate image')
+          } else if ((result.status as string) === 'pending') {
+            // Update status to pending but don't update progress
+            setGenerationStatus('pending')
+            setTimeout(checkStatus, 2000) // Check again in 2 seconds
+            // reset start time when pending
+            startTime = new Date()
+          } else if (result.status === 'processing') {
+            // For 'processing' status
+            setGenerationStatus('processing')
+            const elapsedSeconds = (new Date().getTime() - startTime.getTime()) / 1000
+            const progressPercent = Math.min(Math.floor((elapsedSeconds / expectedTotalTime) * 100), 99)
+            setProgress(progressPercent)
+            setTimeout(checkStatus, 1000)
           } else {
+            // For any other status
+            setGenerationStatus('processing')
             const elapsedSeconds = (new Date().getTime() - startTime.getTime()) / 1000
             const progressPercent = Math.min(Math.floor((elapsedSeconds / expectedTotalTime) * 100), 99)
             setProgress(progressPercent)
@@ -360,7 +467,9 @@ export default function EditorPage() {
                           {isGenerating ? (
                             <>
                               <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
-                              Generating...
+                              {generationStatus === 'pending' ? 
+                                "In Queue..." : 
+                                "Generating..."}
                             </>
                           ) : (
                             "Generate Cum Face"
@@ -445,38 +554,58 @@ export default function EditorPage() {
                 </CardContent>
               </Card>
 
-              <h2 className="text-2xl font-bold mb-4">Historical Images</h2>
-              {historicalImages.length > 0 ? (
+              <h2 className="text-2xl font-bold mb-4">
+                Historical Images
+                {!isLoading && historicalImages.some(gen => !gen.generation && gen.comfyui_prompt_id) && (
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    ({historicalImages.filter(gen => !gen.generation && gen.comfyui_prompt_id).length} processing)
+                  </span>
+                )}
+              </h2>
+              {isLoading ? (
+                <div className="flex justify-center items-center p-8">
+                  <div className="flex flex-col items-center">
+                    <IconLoader2 className="h-10 w-10 animate-spin text-primary mb-2" />
+                    <p className="text-sm font-medium text-muted-foreground">Loading your previous generations...</p>
+                  </div>
+                </div>
+              ) : historicalImages.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {historicalImages.map((img, index) => (
+                  {historicalImages.map((generation, index) => (
                     <Card key={index}>
                       <CardContent className="p-2 flex justify-center">
                         <div className="relative w-full aspect-square">
-                          <Image
-                            src={img || "/placeholder.svg"}
-                            alt={`Historical Image ${index + 1}`}
-                            fill
-                            className="rounded-lg object-cover"
-                          />
+                          {generation.generation ? (
+                            <Image
+                              src={generation.generation || "/placeholder.svg"}
+                              alt={`Historical Image ${index + 1}`}
+                              fill
+                              className="rounded-lg object-cover"
+                            />
+                          ) : generation.comfyui_prompt_id ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-muted rounded-lg animate-pulse">
+                              <IconLoader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {isGenerating && generationStatus === 'pending' ? 
+                                  "In Queue..." : 
+                                  "Processing..."}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">This may take a moment</p>
+                            </div>
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
+                              <p className="text-sm font-medium text-muted-foreground">No image available</p>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <p className="text-gray-500 text-lg mb-4">You haven&apos;t generated any images yet.</p>
-                    <p className="text-gray-400">Use the prompt input above to create your first Happy Face!</p>
-                    <Image
-                      src="/placeholder.svg?height=200&width=200&text=No Images Yet"
-                      alt="No Images Placeholder"
-                      width={200}
-                      height={200}
-                      className="mx-auto mt-6 opacity-50"
-                    />
-                  </CardContent>
-                </Card>
+                <div className="text-center p-8 border rounded-lg bg-muted">
+                  <p>No historical images found. Generate your first image!</p>
+                </div>
               )}
             </div>
           </div>
