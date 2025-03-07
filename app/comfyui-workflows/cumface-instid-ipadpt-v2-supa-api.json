@@ -1,0 +1,311 @@
+{
+  "4": {
+    "inputs": {
+      "ckpt_name": "halcyonSDXL_v19.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "ugly, organ, dick, cock, multiple person",
+      "clip": [
+        "241",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "73",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "73": {
+    "inputs": {
+      "seed": 1095473654217403,
+      "steps": 30,
+      "cfg": 7.890000000000001,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "206",
+        0
+      ],
+      "positive": [
+        "237",
+        1
+      ],
+      "negative": [
+        "237",
+        2
+      ],
+      "latent_image": [
+        "225",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "190": {
+    "inputs": {
+      "text": "cum on face, woman, orgasm, cum on her face\n",
+      "clip": [
+        "241",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "206": {
+    "inputs": {
+      "weight": 0.97,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "207",
+        0
+      ],
+      "ipadapter": [
+        "207",
+        1
+      ],
+      "image": [
+        "244",
+        0
+      ]
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "IPAdapter Advanced"
+    }
+  },
+  "207": {
+    "inputs": {
+      "preset": "STANDARD (medium strength)",
+      "model": [
+        "237",
+        0
+      ]
+    },
+    "class_type": "IPAdapterUnifiedLoader",
+    "_meta": {
+      "title": "IPAdapter Unified Loader"
+    }
+  },
+  "221": {
+    "inputs": {
+      "image": "1_lCwovmvUhKaXWa8g9UF13A.webp",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "225": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "226": {
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "236": {
+    "inputs": {
+      "instantid_file": "SDXL/ip-adapter.bin"
+    },
+    "class_type": "InstantIDModelLoader",
+    "_meta": {
+      "title": "Load InstantID Model"
+    }
+  },
+  "237": {
+    "inputs": {
+      "weight": 0.88,
+      "start_at": 0,
+      "end_at": 1,
+      "instantid": [
+        "236",
+        0
+      ],
+      "insightface": [
+        "238",
+        0
+      ],
+      "control_net": [
+        "239",
+        0
+      ],
+      "image": [
+        "244",
+        0
+      ],
+      "model": [
+        "241",
+        0
+      ],
+      "positive": [
+        "190",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "ApplyInstantID",
+    "_meta": {
+      "title": "ZenID FaceSwap"
+    }
+  },
+  "238": {
+    "inputs": {
+      "provider": "CUDA"
+    },
+    "class_type": "InstantIDFaceAnalysis",
+    "_meta": {
+      "title": "InstantID Face Analysis"
+    }
+  },
+  "239": {
+    "inputs": {
+      "control_net_name": "SDXL/instantid/diffusion_pytorch_model.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "240": {
+    "inputs": {
+      "lora_name": "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "241": {
+    "inputs": {
+      "lora_name": "orgasmface_SDXL.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "240",
+        0
+      ],
+      "clip": [
+        "240",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "242": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "243": {
+    "inputs": {
+      "supabase_url": "https://bjqbwtqznzladztznntj.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcWJ3dHF6bnpsYWR6dHpubnRqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwMjE3NjU1MywiZXhwIjoyMDE3NzUyNTUzfQ.X2TkE85qR9jjTDKvvzL0IM94a6fzakb6FjvCSs5uPk8",
+      "storage_bucket": "images",
+      "storage_path": "comfyui_uploads/",
+      "filename_prefix": "comfy_",
+      "image": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SupabaseStorageUploader",
+    "_meta": {
+      "title": "Supabase Storage Uploader"
+    }
+  },
+  "244": {
+    "inputs": {
+      "url_or_path": "https://bjqbwtqznzladztznntj.supabase.co/storage/v1/object/public/images/public/1_lCwovmvUhKaXWa8g9UF13A.webp"
+    },
+    "class_type": "LoadImageFromUrlOrPath",
+    "_meta": {
+      "title": "LoadImageFromUrlOrPath"
+    }
+  },
+  "250": {
+    "inputs": {
+      "output": "",
+      "source": [
+        "243",
+        0
+      ]
+    },
+    "class_type": "Display Any (rgthree)",
+    "_meta": {
+      "title": "Display Any (rgthree)"
+    }
+  }
+}

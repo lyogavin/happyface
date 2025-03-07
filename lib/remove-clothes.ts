@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
-import removeClothesWorkflow from '@/app/comfyui-workflows/agfluxnsfw-fill-inpaint-api.json'
+import removeClothesWorkflow from '@/app/comfyui-workflows/agfluxnsfw-fill-inpaint-supabase-api.json'
 import sharp from 'sharp'
 
 // Initialize Supabase client
@@ -176,9 +176,9 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
 
     const data = await response.json();
     
-    // Check if job is completed - node 9 is the SaveImage node in this workflow
-    if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[9]?.images?.[0]) {
-      const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[9].images[0].filename}`;
+    // Check if job is completed - node 47 is the SupabaseStorageUploader node
+    if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[49]?.text.length > 0 && data[jobId]?.outputs?.[49]?.text[0]) {
+      const imageUrl = data[jobId].outputs[49].text[0];
       
       // Add retry logic for the job completed case
       const MAX_RETRIES = 3;
@@ -187,38 +187,6 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
 
       while (retryCount < MAX_RETRIES) {
         try {
-          // Download the image from ComfyUI
-          const startTime = new Date();
-          const imageData = await downloadImage(comfyUrl);
-          const endTime = new Date();
-          const downloadTime = endTime.getTime() - startTime.getTime();
-          console.log('Download time', downloadTime);
-          
-          // Upload to Supabase with UUID filename
-          const fileName = `${crypto.randomUUID()}.${imageData.mimeType.split('/')[1]}`;
-          const filePath = `public/removeclothes/${fileName}`;
-          
-          // log upload time
-          const uploadStartTime = new Date();
-          const { error } = await supabase.storage
-            .from('images')
-            .upload(filePath, imageData.blob, {
-              contentType: imageData.mimeType,
-              upsert: true
-            });
-          const uploadEndTime = new Date();
-          const uploadTime = uploadEndTime.getTime() - uploadStartTime.getTime();
-          console.log('Upload time', uploadTime);
-          
-          if (error) {
-            throw new Error(`Failed to upload to Supabase: ${error.message}`);
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('images')
-            .getPublicUrl(filePath);
-
           // log handle remove clothes generation time
           const handleStartTime = new Date();
           // call supabase rpc to save result and decrease credits
@@ -226,7 +194,7 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
             p_user_id: userId,
             p_source_image_url: sourceImageUrl,
             p_prompt: prompt,
-            p_result_image_url: publicUrl,
+            p_result_image_url: imageUrl,
             p_comfyui_prompt_id: jobId,
           });
           const handleEndTime = new Date();
@@ -237,12 +205,12 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
             throw new Error(`Failed to handle remove clothes generation: ${rpcError.message}`);
           }
 
-          console.log('Total time', downloadTime + uploadTime + handleTime, 'returning:', publicUrl);
+          console.log('Total time', handleTime, 'returning:', imageUrl);
 
           return {
             status: 'completed',
             progress: 100,
-            url: publicUrl
+            url: imageUrl
           };
         } catch (error: unknown) {
           lastError = error;

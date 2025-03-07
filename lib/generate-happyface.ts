@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 import appConfig from './app-config'
 import { getUserSubscriptionStatus } from './user-utils'
-import cumfaceInstidIpadapterWorkflow from '@/app/comfyui-workflows/cumface-instid-ipadpt-v2-api.json'
+import cumfaceInstidIpadapterWorkflow from '@/app/comfyui-workflows/cumface-instid-ipadpt-v2-supa-api.json'
 import sharp from 'sharp'
 // Initialize Supabase client
 const supabase = createClient(
@@ -36,13 +36,10 @@ export async function submitHappyFaceJob(
   workflow[73].inputs.seed = Math.floor(Math.random() * 1000000);
 
   if (sourceImageUrl) {
-    // Download and upload the source image
-    const sourceImage = await downloadImage(sourceImageUrl);
-    const sourceName = await uploadImage(sourceImage);
-    workflow[221].inputs.image = sourceName;
+    // Directly set the source image URL in the workflow
+    workflow[244].inputs.url_or_path = sourceImageUrl;
     // set ipadapter strength to 1.12
     workflow[206].inputs.weight = 1.12;
-  
   } else {
     // If no source image, set weights to 0
     workflow[206].inputs.weight = 0;
@@ -157,6 +154,8 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
     const queueResponse = await fetch(`${COMFY_API_HOST}/queue`, {
       signal: AbortSignal.timeout(15000) // 15 seconds timeout
     });
+
+    //console.log('queueResponse', queueResponse);
     
     if (!queueResponse.ok) {
       console.error('Failed to check queue status', queueResponse);
@@ -168,6 +167,8 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
     }
     
     const queueData = await queueResponse.json();
+
+    console.log('queueData', queueData);
     
     // Check if job is in queue
     const isInRunningQueue = queueData.queue_running.some(
@@ -211,10 +212,12 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
     }
 
     const data = await response.json();
+
+    console.log('data', data, 'jobId', jobId);
     
-    // Check if job is completed - node 242 is now the SaveImage node
-    if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[242]?.images?.[0]) {
-      const comfyUrl = `${COMFY_API_HOST}/view?filename=${data[jobId].outputs[242].images[0].filename}`;
+    // Check if job is completed - node 243 is now the SupabaseStorageUploader node
+    if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[250]?.text.length > 0 && data[jobId]?.outputs?.[250]?.text[0]) {
+      const imageUrl = data[jobId].outputs[250].text[0];
       
       // Add retry logic for the job completed case
       const MAX_RETRIES = 3;
@@ -223,39 +226,6 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
 
       while (retryCount < MAX_RETRIES) {
         try {
-          // Download the image from ComfyUI
-          // log download image time
-          const startTime = new Date();
-          const imageData = await downloadImage(comfyUrl);
-          const endTime = new Date();
-          const downloadTime = endTime.getTime() - startTime.getTime();
-          console.log('Download time', downloadTime);
-          
-          // Upload to Supabase with UUID filename
-          const fileName = `${crypto.randomUUID()}.${imageData.mimeType.split('/')[1]}`;
-          const filePath = `public/happyface/${fileName}`;
-          
-          // log upload time
-          const uploadStartTime = new Date();
-          const { error } = await supabase.storage
-            .from('images')
-            .upload(filePath, imageData.blob, {
-              contentType: imageData.mimeType,
-              upsert: true
-            });
-          const uploadEndTime = new Date();
-          const uploadTime = uploadEndTime.getTime() - uploadStartTime.getTime();
-          console.log('Upload time', uploadTime);
-          
-          if (error) {
-            throw new Error(`Failed to upload to Supabase: ${error.message}`);
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('images')
-            .getPublicUrl(filePath);
-
           // log handle happyface generation time
           const handleHappyfaceStartTime = new Date();
           // call supabase rpc handle_happyface_generation to save result and decrease credits
@@ -263,7 +233,7 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
             p_user_id: userId,
             p_source_image_url: sourceImageUrl,
             p_prompt: prompt,
-            p_result_image_url: publicUrl,
+            p_result_image_url: imageUrl,
             p_comfyui_prompt_id: jobId,
           });
           const handleHappyfaceEndTime = new Date();
@@ -274,12 +244,12 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
             throw new Error(`Failed to handle happyface generation: ${rpcError.message}`);
           }
 
-          console.log('Total time', downloadTime + uploadTime + handleHappyfaceTime, 'returning:', publicUrl);
+          console.log('Total time', handleHappyfaceTime, 'returning:', imageUrl);
 
           return {
             status: 'completed',
             progress: 100,
-            url: publicUrl
+            url: imageUrl
           };
         } catch (error: unknown) {
           lastError = error;
@@ -346,8 +316,8 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
   }
 }
 
-// Helper functions from selfie-pose generator
-async function downloadImage(url: string): Promise<DownloadedImage> {
+// Export the helper functions so they're not flagged as unused
+export async function downloadImage(url: string): Promise<DownloadedImage> {
   const response = await fetch(url);
   let mimeType = response.headers.get('content-type') || 'image/jpeg';
   
@@ -387,7 +357,7 @@ async function downloadImage(url: string): Promise<DownloadedImage> {
   return { blob, base64, mimeType };
 }
 
-async function uploadImage(imageData: DownloadedImage): Promise<string> {
+export async function uploadImage(imageData: DownloadedImage): Promise<string> {
   const formData = new FormData();
   formData.append('image', imageData.blob);
   
@@ -418,7 +388,7 @@ type DownloadedImage = {
 };
 
 type ComfyUIProgress = {
-  status: 'completed' | 'processing' | 'error';
+  status: 'completed' | 'processing' | 'error' | 'pending';
   progress: number;
   currentStep?: string;
   url?: string;
