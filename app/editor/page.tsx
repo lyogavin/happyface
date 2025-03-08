@@ -36,6 +36,8 @@ import { Progress } from "@/components/ui/progress"
 import { ClothesRemoverSidebar } from "@/components/clothes-remover-sidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { EditorFooter } from "@/app/components/EditorFooter"
+import { validateImage } from "@/lib/image-checker"
+import { AlertCircle } from "lucide-react"
 
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
@@ -51,6 +53,8 @@ export default function EditorPage() {
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'pending' | 'processing' | 'completed' | 'error'>('idle')
+  const [validationError, setValidationError] = useState<string | null>(null)
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
 
   // Add useEffect to load historical generations
   useEffect(() => {
@@ -281,6 +285,14 @@ export default function EditorPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      // Validate image before uploading
+      const validation = validateImage(file);
+      if (!validation.valid) {
+        setValidationError(validation.error || "Please upload a valid image file.");
+        setShowErrorDialog(true);
+        return;
+      }
+      
       try {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -612,6 +624,24 @@ export default function EditorPage() {
           
           {/* Footer */}
           <EditorFooter />
+          
+          {/* Add the error dialog */}
+          <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  Unsupported Image
+                </DialogTitle>
+                <DialogDescription>
+                  {validationError}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button onClick={() => setShowErrorDialog(false)}>OK</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </SidebarProvider>

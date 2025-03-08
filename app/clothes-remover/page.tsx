@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@supabase/supabase-js"
 import { submitRemoveClothesJob, checkRemoveClothesStatus } from "@/lib/remove-clothes"
-import { IconCoin, IconRefresh, IconLoader2, IconDownload, IconUpload, IconEdit } from "@tabler/icons-react"
+import { IconCoin, IconRefresh, IconLoader2, IconDownload, IconUpload, IconEdit, IconAlertCircle } from "@tabler/icons-react"
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,7 @@ import { ClothesRemoverSidebar } from "@/components/clothes-remover-sidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { EditorFooter } from "@/app/components/EditorFooter"
 import { ClothesRemoverLanding } from "@/app/components/clothes-remover-landing"
+import { validateImage } from "@/lib/image-checker"
 
 export default function ClothesRemoverPage() {
   const { user, isLoaded } = useUser()
@@ -55,6 +56,8 @@ export default function ClothesRemoverPage() {
   const [canvasData, setCanvasData] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'pending' | 'processing' | 'completed' | 'error'>('idle')
+  const [validationError, setValidationError] = useState<string | null>(null)
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
 
   // Add useEffect to load historical generations
   useEffect(() => {
@@ -344,6 +347,14 @@ export default function ClothesRemoverPage() {
     }
     
     if (file) {
+      // Validate image using the existing validateImage function
+      const validation = validateImage(file);
+      if (!validation.valid) {
+        setValidationError(validation.error || "Please upload a valid image file.");
+        setShowErrorDialog(true);
+        return;
+      }
+      
       try {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -812,6 +823,24 @@ export default function ClothesRemoverPage() {
           maskData={canvasData || undefined}
           setMaskData={setCanvasData}
         />
+        
+        {/* Add the error dialog */}
+        <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <IconAlertCircle className="h-5 w-5 text-red-500" />
+                Unsupported Image
+              </DialogTitle>
+              <DialogDescription>
+                {validationError}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setShowErrorDialog(false)}>OK</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   )
