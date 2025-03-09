@@ -222,9 +222,11 @@ export default function EditorPage() {
               description: "Your happy face has been generated.",
             })
           } else if (result.status === 'error') {
-            posthog.capture('generation_error', {'error': result})
-            setGenerationStatus('error')
-            throw new Error('Failed to generate image')
+            posthog.capture('generation_error', {'error': result, 'source': 'returned error'})
+            //setGenerationStatus('error')
+            //throw new Error('Failed to generate image')
+            // don't stop checking status
+            setTimeout(checkStatus, 2000) // Check again in 2 seconds
           } else if ((result.status as string) === 'pending') {
             // Update status to pending but don't update progress
             setGenerationStatus('pending')
@@ -248,15 +250,18 @@ export default function EditorPage() {
           }
         } catch (error) {
           console.error('Error checking generation status:', error)
-          setIsGenerating(false)
+          /*setIsGenerating(false)
           setError('Failed to check generation status. Please try again.')
           toast({
             title: "Error",
             description: "Failed to check generation status. Please try again.",
             variant: "destructive",
           })
-          posthog.capture('generation_error', {'error': error})
           setProgress(0)
+            */
+          posthog.capture('generation_error', {'error': error, 'source': 'exception'})
+          // for exception, log and report error, but don't stop re checking status
+          setTimeout(checkStatus, 1000)
         }
       }
 
@@ -270,13 +275,13 @@ export default function EditorPage() {
           setShowCreditDialog(true)
           setError('You need more credits to generate images')
         } else {
-          setError("Error generating image, please try again.")
+          setError("Error generating  , please try again.")
           toast({
             title: "Error",
-            description: "Error generating image, please try again.",
+            description: "Error submitting the job, please try again.",
             variant: "destructive",
           })
-          posthog.capture('generation_error', {'error': error})
+          posthog.capture('generation_error', {'error': error, 'source': 'submitHappyFaceJob'})
         }
       }
     }
