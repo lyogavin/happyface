@@ -39,7 +39,7 @@ export async function submitHappyFaceJob(
     // Directly set the source image URL in the workflow
     workflow[244].inputs.url_or_path = sourceImageUrl;
     // set ipadapter strength to 1.12
-    workflow[206].inputs.weight = 1.12;
+    workflow[206].inputs.weight = 0.97;
   } else {
     // If no source image, set weights to 0
     workflow[206].inputs.weight = 0;
@@ -48,7 +48,7 @@ export async function submitHappyFaceJob(
 
   // Set LoRA strengths if provided
   if (cumStrength !== undefined) {
-    const cumStrengthModelFactor = 0.92;
+    const cumStrengthModelFactor = 1.12;
     const cumStrengthClipFactor = 1.3;
     workflow[240].inputs.strength_model = cumStrength * cumStrengthModelFactor;
     workflow[240].inputs.strength_clip = cumStrength * cumStrengthClipFactor;
@@ -62,7 +62,7 @@ export async function submitHappyFaceJob(
   }
 
   // Set prompt if provided
-  const cumPart = cumStrength && cumStrength > 0.2 ? 'cum on face, ' : '';
+  const cumPart = cumStrength && cumStrength > 0.2 ? 'cum on face, a lot of cum on face, ' : '';
   const orgasmPart = orgasmStrength && orgasmStrength > 0.2 ? 'orgasm, ' : '';
   if (prompt) {
     let mergedPrompt = prompt;
