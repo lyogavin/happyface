@@ -221,6 +221,7 @@ export default function EditorPage() {
               title: "Success!",
               description: "Your happy face has been generated.",
             })
+            posthog.capture('generation_success', {'url': result.url})
           } else if (result.status === 'error') {
             posthog.capture('generation_error', {'error': result, 'source': 'returned error'})
             //setGenerationStatus('error')
