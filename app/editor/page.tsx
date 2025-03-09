@@ -38,6 +38,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { EditorFooter } from "@/app/components/EditorFooter"
 import { validateImage } from "@/lib/image-checker"
 import { AlertCircle } from "lucide-react"
+import pRetry, { AbortError } from 'p-retry'
 
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
@@ -177,13 +178,46 @@ export default function EditorPage() {
         'uploaded_image': uploadedImage
       })
 
-      const jobId = await submitHappyFaceJob(
-        userId || '', 
-        uploadedImage, 
-        prompt,
-        cumStrength,
-        orgasmStrength
-      )
+      // Use p-retry for submitHappyFaceJob
+      const jobId = await pRetry(
+        async () => {
+          const result = await submitHappyFaceJob(
+            userId || '', 
+            uploadedImage, 
+            prompt,
+            cumStrength,
+            orgasmStrength
+          )
+          
+          // Handle specific error cases that shouldn't be retried
+          if (result === 'Insufficient credits') {
+            throw new AbortError('Insufficient credits')
+          }
+          
+          if (!result) {
+            throw new Error('Failed to submit job')
+          }
+          
+          return result
+        },
+        { 
+          retries: 5,
+          onFailedAttempt: (error: any) => {
+            console.error(`Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`, error)
+          }
+        }
+      ).catch((error: any) => {
+        if (error instanceof AbortError) {
+          return 'Insufficient credits'
+        }
+        posthog.capture('generation_error', {
+          'error': error,
+          'source': 'submitHappyFaceJob error'
+        })
+        setError('Failed to submit the job, please try again.')
+        setIsGenerating(false)
+        throw error
+      })
 
       if (jobId === 'Insufficient credits') {
         posthog.capture('user_insufficient_credits')

@@ -39,6 +39,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { EditorFooter } from "@/app/components/EditorFooter"
 import { ClothesRemoverLanding } from "@/app/components/clothes-remover-landing"
 import { validateImage } from "@/lib/image-checker"
+import pRetry, { AbortError } from 'p-retry'
 
 export default function ClothesRemoverPage() {
   const { user, isLoaded } = useUser()
@@ -234,14 +235,43 @@ export default function ClothesRemoverPage() {
         }
       }
 
-
-      // Use the new clothes removal specific API with the uploaded mask URL
-      const jobId = await submitRemoveClothesJob(
-        userId || '', 
-        uploadedImage,
-        maskImageUrl,
-        prompt
-      )
+      // Use p-retry for submitRemoveClothesJob
+      const jobId = await pRetry(
+        async () => {
+          const result = await submitRemoveClothesJob(
+            userId || '', 
+            uploadedImage,
+            maskImageUrl,
+            prompt
+          )
+          
+          // Handle specific error cases that shouldn't be retried
+          if (result === 'Insufficient credits') {
+            throw new AbortError('Insufficient credits')
+          }
+          
+          if (!result) {
+            throw new Error('Failed to submit job')
+          }
+          
+          return result
+        },
+        { 
+          retries: 5,
+          onFailedAttempt: (error: any) => {
+            console.error(`Attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`, error)
+          }
+        }
+      ).catch((error: any) => {
+        if (error instanceof AbortError) {
+          return 'Insufficient credits'
+        }
+        posthog.capture('generation_error', {
+          'error': error,
+          'source': 'submitRemoveClothesJob_retry'
+        })
+        throw error
+      })
 
       if (jobId === 'Insufficient credits') {
         posthog.capture('user_insufficient_credits')
