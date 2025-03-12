@@ -29,6 +29,7 @@ export async function submitHappyFaceJobAdvanced(
   onlyModifyFace?: boolean
 ): Promise<string> {
   console.log('submitHappyFaceJob', userId, sourceImageUrl, prompt, cumStrength, orgasmStrength, onlyModifyFace);
+
   // Check user subscription status first
   const subscription = await getUserSubscriptionStatus(userId);
   if (!subscription || subscription.credits < 1) {
@@ -261,7 +262,15 @@ export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string
     const data = await response.json();
 
     console.log('data', data, 'jobId', jobId);
-    
+
+    if (data['status']?.status_str === 'error') {
+      console.error('Job error', data['status']);
+      return {
+        status: 'job_error',
+        progress: 0,
+        currentStep: 'Error'
+      };
+    }
     // Check if job is completed - now looking for text output from Display Any node (92)
     if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[92]?.text?.length > 0 && data[jobId]?.outputs?.[92]?.text[0]) {
       const imageUrl = data[jobId].outputs[92].text[0];
@@ -435,7 +444,7 @@ type DownloadedImage = {
 };
 
 type ComfyUIProgress = {
-  status: 'completed' | 'processing' | 'error' | 'pending';
+  status: 'completed' | 'processing' | 'error' | 'pending' | 'job_error';
   progress: number;
   currentStep?: string;
   url?: string;

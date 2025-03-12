@@ -126,7 +126,7 @@ export default function ClothesRemoverPage() {
             gen.prompt || ''
           );
           
-          // If the generation is completed, update it
+          // If the generation is completed or failed with job_error, update it
           if (status.status === 'completed' && status.url) {
             console.log(`Generation ${gen.comfyui_prompt_id} completed!`);
             updatedGenerationIds.push(gen.comfyui_prompt_id);
@@ -136,6 +136,19 @@ export default function ClothesRemoverPage() {
               prev.map(prevGen => 
                 prevGen.comfyui_prompt_id === gen.comfyui_prompt_id
                   ? { ...prevGen, generation: status.url as string }
+                  : prevGen
+              )
+            );
+          } else if (status.status === 'job_error') {
+            console.log(`Generation ${gen.comfyui_prompt_id} failed with job error`);
+            posthog.capture('generation_job_error', {'error': status, 'source': 'job_error'})
+            updatedGenerationIds.push(gen.comfyui_prompt_id);
+            
+            // Update our local state to mark as job_error
+            setHistoricalImages(prev => 
+              prev.map(prevGen => 
+                prevGen.comfyui_prompt_id === gen.comfyui_prompt_id
+                  ? { ...prevGen, generation: 'job_error' }
                   : prevGen
               )
             );
@@ -311,6 +324,18 @@ export default function ClothesRemoverPage() {
               description: "Your clothes-free image has been generated.",
             })
             posthog.capture('generation_success', {'url': result.url})
+          } else if (result.status === 'job_error') {
+            posthog.capture('generation_job_error', {'error': result, 'source': 'job_error'})
+            // Update historical images to mark as job_error
+            setHistoricalImages(prev => 
+              prev.map(prevGen => 
+                prevGen.comfyui_prompt_id === jobId
+                  ? { ...prevGen, generation: 'job_error' }
+                  : prevGen
+              )
+            )
+            setError('Failed to generate image, please try again.')
+            setIsGenerating(false)
           } else if (result.status === 'error') {
             posthog.capture('generation_error', {'error': result, 'source': 'returned error'})
             //setGenerationStatus('error')
@@ -802,7 +827,13 @@ export default function ClothesRemoverPage() {
                     <Card key={index}>
                       <CardContent className="p-2 flex justify-center">
                         <div className="relative w-full aspect-square">
-                          {generation.generation ? (
+                          {generation.generation === 'job_error' ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-red-50 rounded-lg">
+                              <IconAlertCircle className="h-8 w-8 text-red-500 mb-2" />
+                              <p className="text-sm font-medium text-red-600">Generation Failed</p>
+                              <p className="text-xs text-red-500 mt-1">Please try again</p>
+                            </div>
+                          ) : generation.generation ? (
                             <Image
                               src={generation.generation || "/placeholder.svg"}
                               alt={`Historical Image ${index + 1}`}

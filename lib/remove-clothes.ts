@@ -176,6 +176,16 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
 
     const data = await response.json();
     
+    // Add check for job error status
+    if (data['status']?.status_str === 'error') {
+      console.error('Job error', data['status']);
+      return {
+        status: 'job_error',
+        progress: 0,
+        currentStep: 'Error'
+      };
+    }
+
     // Check if job is completed - node 47 is the SupabaseStorageUploader node
     if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[49]?.text.length > 0 && data[jobId]?.outputs?.[49]?.text[0]) {
       const imageUrl = data[jobId].outputs[49].text[0];
@@ -333,7 +343,7 @@ type DownloadedImage = {
 };
 
 type ComfyUIProgress = {
-  status: 'completed' | 'processing' | 'pending' | 'error';
+  status: 'completed' | 'processing' | 'pending' | 'error' | 'job_error';
   progress: number;
   currentStep?: string;
   url?: string;

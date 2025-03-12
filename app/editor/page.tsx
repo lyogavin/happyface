@@ -38,7 +38,7 @@ import { ClothesRemoverSidebar } from "@/components/clothes-remover-sidebar"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { EditorFooter } from "@/app/components/EditorFooter"
 import { validateImage } from "@/lib/image-checker"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle as LucideAlertCircle } from "lucide-react"
 import pRetry, { AbortError } from 'p-retry'
 
 export default function EditorPage() {
@@ -65,7 +65,7 @@ export default function EditorPage() {
   useEffect(() => {
     const MOCK_LOCAL = true;
     if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
-      setFeatureFlagControl(false)
+      setFeatureFlagControl(true)
       setExpectedTotalTime(129)
     } else {
       const flag = posthog.getFeatureFlag('new-happyface-workflow')
@@ -159,6 +159,19 @@ export default function EditorPage() {
               prev.map(prevGen => 
                 prevGen.comfyui_prompt_id === gen.comfyui_prompt_id
                   ? { ...prevGen, generation: status.url || '' }
+                  : prevGen
+              )
+            );
+          } else if (status.status === 'job_error') {
+            console.error(`Generation ${gen.comfyui_prompt_id} failed with job error`);
+            posthog.capture('generation_job_error', {'error': status, 'source': 'job_error'})
+            updatedGenerationIds.push(gen.comfyui_prompt_id);
+            
+            // Update our local state to mark as job_error
+            setHistoricalImages(prev => 
+              prev.map(prevGen => 
+                prevGen.comfyui_prompt_id === gen.comfyui_prompt_id
+                  ? { ...prevGen, generation: 'job_error' }
                   : prevGen
               )
             );
@@ -297,6 +310,12 @@ export default function EditorPage() {
               description: "Your happy face has been generated.",
             })
             posthog.capture('generation_success', {'url': result.url})
+          } else if (result.status === 'job_error') {
+            posthog.capture('generation_job_error', {'error': result, 'source': 'job_error'})
+            setError('Failed to generate image, please try again.')
+            setIsGenerating(false)
+            // don't stop checking status
+            // setTimeout(checkStatus, 2000) // Check again in 2 seconds
           } else if (result.status === 'error') {
             posthog.capture('generation_error', {'error': result, 'source': 'returned error'})
             //setGenerationStatus('error')
@@ -681,7 +700,13 @@ export default function EditorPage() {
                     <Card key={index}>
                       <CardContent className="p-2 flex justify-center">
                         <div className="relative w-full aspect-square">
-                          {generation.generation ? (
+                          {generation.generation === 'job_error' ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-red-50 rounded-lg">
+                              <LucideAlertCircle className="h-8 w-8 text-red-500 mb-2" />
+                              <p className="text-sm font-medium text-red-600">Generation Failed</p>
+                              <p className="text-xs text-red-500 mt-1">Please try again</p>
+                            </div>
+                          ) : generation.generation ? (
                             <Image
                               src={generation.generation || "/placeholder.svg"}
                               alt={`Historical Image ${index + 1}`}
@@ -724,7 +749,7 @@ export default function EditorPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <LucideAlertCircle className="h-5 w-5 text-red-500" />
                   Unsupported Image
                 </DialogTitle>
                 <DialogDescription>

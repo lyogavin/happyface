@@ -215,6 +215,16 @@ export async function checkHappyFaceStatus(jobId: string, userId: string, source
 
     console.log('data', data, 'jobId', jobId);
     
+    // Add check for job error status
+    if (data['status']?.status_str === 'error') {
+      console.error('Job error', data['status']);
+      return {
+        status: 'job_error',
+        progress: 0,
+        currentStep: 'Error'
+      };
+    }
+
     // Check if job is completed - node 243 is now the SupabaseStorageUploader node
     if (Object.keys(data).length > 0 && data[jobId]?.outputs?.[250]?.text.length > 0 && data[jobId]?.outputs?.[250]?.text[0]) {
       const imageUrl = data[jobId].outputs[250].text[0];
@@ -388,7 +398,7 @@ type DownloadedImage = {
 };
 
 type ComfyUIProgress = {
-  status: 'completed' | 'processing' | 'error' | 'pending';
+  status: 'completed' | 'processing' | 'error' | 'pending' | 'job_error';
   progress: number;
   currentStep?: string;
   url?: string;
