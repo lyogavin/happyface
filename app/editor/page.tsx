@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@supabase/supabase-js"
 import { submitHappyFaceJob, checkHappyFaceStatus } from "@/lib/generate-happyface"
+import { submitHappyFaceJobAdvanced, checkHappyFaceStatusAdvanced } from "@/lib/generate-happyface-advanced"
 import { IconCoin, IconRefresh, IconLoader2, IconDownload } from "@tabler/icons-react"
 import {
   Dialog,
@@ -56,6 +57,22 @@ export default function EditorPage() {
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'pending' | 'processing' | 'completed' | 'error'>('idle')
   const [validationError, setValidationError] = useState<string | null>(null)
   const [showErrorDialog, setShowErrorDialog] = useState(false)
+  const [onlyModifyFace, setOnlyModifyFace] = useState(true)
+  const [expectedTotalTime, setExpectedTotalTime] = useState(88)
+
+  const [featureFlagControl, setFeatureFlagControl] = useState(true)
+
+  useEffect(() => {
+    const MOCK_LOCAL = true;
+    if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
+      setFeatureFlagControl(false)
+      setExpectedTotalTime(129)
+    } else {
+      const flag = posthog.getFeatureFlag('new-happyface-workflow')
+      setFeatureFlagControl(flag === 'control')
+      setExpectedTotalTime(88)
+    }
+  }, [])
 
   // Add useEffect to load historical generations
   useEffect(() => {
@@ -117,13 +134,20 @@ export default function EditorPage() {
         if (!gen.comfyui_prompt_id) return;
         
         try {
-          // Call checkHappyFaceStatus to get the result
-          const status = await checkHappyFaceStatus(
-            gen.comfyui_prompt_id,
-            userId,
-            gen.upload_image,
-            gen.prompt || ''
-          );
+          // Call the appropriate status checking function based on featureFlagControl
+          const status = featureFlagControl
+            ? await checkHappyFaceStatus(
+                gen.comfyui_prompt_id,
+                userId,
+                gen.upload_image,
+                gen.prompt || ''
+              )
+            : await checkHappyFaceStatusAdvanced(
+                gen.comfyui_prompt_id,
+                userId,
+                gen.upload_image,
+                gen.prompt || ''
+              );
           
           // If the generation is completed, update it
           if (status.status === 'completed' && status.url) {
@@ -175,19 +199,35 @@ export default function EditorPage() {
         'prompt': prompt,
         'cum_strength': cumStrength,
         'orgasm_strength': orgasmStrength,
-        'uploaded_image': uploadedImage
+        'uploaded_image': uploadedImage,
+        'only_modify_face': onlyModifyFace
       })
 
       // Use p-retry for submitHappyFaceJob
       const jobId = await pRetry(
         async () => {
-          const result = await submitHappyFaceJob(
-            userId || '', 
-            uploadedImage, 
-            prompt,
-            cumStrength,
-            orgasmStrength
-          )
+          let result;
+          
+          if (featureFlagControl) {
+            // Use the standard version
+            result = await submitHappyFaceJob(
+              userId || '', 
+              uploadedImage, 
+              prompt,
+              cumStrength,
+              orgasmStrength
+            )
+          } else {
+            // Use the advanced version
+            result = await submitHappyFaceJobAdvanced(
+              userId || '', 
+              uploadedImage, 
+              prompt,
+              cumStrength,
+              orgasmStrength,
+              onlyModifyFace
+            )
+          }
           
           // Handle specific error cases that shouldn't be retried
           if (result === 'Insufficient credits') {
@@ -228,9 +268,10 @@ export default function EditorPage() {
       }
 
       const checkStatus = async () => {
-        const expectedTotalTime = 88;
         try {
-          const result = await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)
+          const result = featureFlagControl 
+            ? await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)
+            : await checkHappyFaceStatusAdvanced(jobId, userId || '', uploadedImage, prompt);
           
           if (result.status === 'completed' && result.url) {
             const endTime = new Date()
@@ -479,7 +520,7 @@ export default function EditorPage() {
                           )}
                         </div>
 
-                        <Accordion type="single" collapsible className="w-full">
+                        <Accordion type="single" collapsible className="w-full" defaultValue="settings">
                           <AccordionItem value="settings">
                             <AccordionTrigger>Advanced Settings</AccordionTrigger>
                             <AccordionContent>
@@ -506,6 +547,19 @@ export default function EditorPage() {
                                     onValueChange={(value) => setOrgasmStrength(value[0])}
                                   />
                                 </div>
+                                {!featureFlagControl && (
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id="only-modify-face"
+                                      checked={onlyModifyFace}
+                                      onChange={(e) => setOnlyModifyFace(e.target.checked)}
+                                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      disabled={!uploadedImage}
+                                    />
+                                    <Label htmlFor="only-modify-face">Only modify face</Label>
+                                  </div>
+                                )}
                               </div>
                             </AccordionContent>
                           </AccordionItem>

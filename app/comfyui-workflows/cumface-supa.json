@@ -1,0 +1,693 @@
+{
+  "last_node_id": 95,
+  "last_link_id": 291,
+  "nodes": [
+    {
+      "id": 39,
+      "type": "CLIPTextEncode",
+      "pos": [
+        520,
+        430
+      ],
+      "size": [
+        291.9967346191406,
+        128.62518310546875
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 263
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "shape": 3,
+          "links": [
+            290
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "orgasm, cum on her face"
+      ]
+    },
+    {
+      "id": 81,
+      "type": "Note",
+      "pos": [
+        -1965.5362548828125,
+        493.79888916015625
+      ],
+      "size": [
+        848.1544189453125,
+        395.49517822265625
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "recraft upscale to > 1440 resolution first!!!"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 78,
+      "type": "LoraLoader",
+      "pos": [
+        -322.3659973144531,
+        -133.2694549560547
+      ],
+      "size": [
+        591.855224609375,
+        169.05918884277344
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 258
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 259
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            260
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            261
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
+        1.5,
+        1.52
+      ]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [
+        1910,
+        200
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 7
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            19,
+            279
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 91,
+      "type": "SupabaseStorageUploader",
+      "pos": [
+        2207.925537109375,
+        -329.60589599609375
+      ],
+      "size": [
+        315,
+        174
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": 279
+        },
+        {
+          "name": "vhs_filenames",
+          "type": "VHS_FILENAMES",
+          "shape": 7,
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "public_url",
+          "type": "STRING",
+          "links": [
+            280
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "aux_id": "lyogavin/comfyui_supabase_storage_upload",
+        "ver": "2086c4b6ee23fb2d282ba700c67a3cebc5e38766",
+        "Node name for S&R": "SupabaseStorageUploader"
+      },
+      "widgets_values": [
+        "https://your-project-id.supabase.co",
+        "your-supabase-key",
+        "images",
+        "uploads/",
+        "comfy_"
+      ]
+    },
+    {
+      "id": 92,
+      "type": "Display Any (rgthree)",
+      "pos": [
+        2807.077880859375,
+        -494.281982421875
+      ],
+      "size": [
+        264.5999755859375,
+        88
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "dir": 3,
+          "link": 280
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "rgthree-comfy",
+        "ver": "1.0.0",
+        "Node name for S&R": "Display Any (rgthree)"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 90,
+      "type": "Reroute",
+      "pos": [
+        777.8497924804688,
+        906.5933227539062
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "*",
+          "links": null
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 4,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        -680.9808349609375,
+        435.4715576171875
+      ],
+      "size": [
+        315,
+        98
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            258
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            259
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            8
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "halcyonSDXL_v19.safetensors"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "KSampler",
+      "pos": [
+        1408.57763671875,
+        -4.548309803009033
+      ],
+      "size": [
+        315,
+        262
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 289
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 290
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 291
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 287
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        1631591740,
+        "fixed",
+        31,
+        5.23,
+        "ddpm",
+        "karras",
+        1
+      ]
+    },
+    {
+      "id": 40,
+      "type": "CLIPTextEncode",
+      "pos": [
+        520,
+        620
+      ],
+      "size": [
+        286.3603515625,
+        112.35245513916016
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 264
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "shape": 3,
+          "links": [
+            291
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "photograph, deformed, glitch, noisy, realistic, stock photo"
+      ]
+    },
+    {
+      "id": 73,
+      "type": "LoraLoader",
+      "pos": [
+        403.98748779296875,
+        -147.52223205566406
+      ],
+      "size": [
+        315,
+        126
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 260
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 261
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            289
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            263,
+            264
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "orgasmface_SDXL.safetensors",
+        0.9400000000000001,
+        1.01
+      ]
+    },
+    {
+      "id": 5,
+      "type": "EmptyLatentImage",
+      "pos": [
+        1021.8358764648438,
+        564.637451171875
+      ],
+      "size": [
+        315,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            287
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1016,
+        1016,
+        1
+      ]
+    },
+    {
+      "id": 15,
+      "type": "PreviewImage",
+      "pos": [
+        2783.148681640625,
+        -106.46995544433594
+      ],
+      "size": [
+        232.2165069580078,
+        318.6186828613281
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      7,
+      3,
+      0,
+      8,
+      0,
+      "LATENT"
+    ],
+    [
+      8,
+      4,
+      2,
+      8,
+      1,
+      "VAE"
+    ],
+    [
+      19,
+      8,
+      0,
+      15,
+      0,
+      "IMAGE"
+    ],
+    [
+      258,
+      4,
+      0,
+      78,
+      0,
+      "MODEL"
+    ],
+    [
+      259,
+      4,
+      1,
+      78,
+      1,
+      "CLIP"
+    ],
+    [
+      260,
+      78,
+      0,
+      73,
+      0,
+      "MODEL"
+    ],
+    [
+      261,
+      78,
+      1,
+      73,
+      1,
+      "CLIP"
+    ],
+    [
+      263,
+      73,
+      1,
+      39,
+      0,
+      "CLIP"
+    ],
+    [
+      264,
+      73,
+      1,
+      40,
+      0,
+      "CLIP"
+    ],
+    [
+      279,
+      8,
+      0,
+      91,
+      0,
+      "IMAGE"
+    ],
+    [
+      280,
+      91,
+      0,
+      92,
+      0,
+      "*"
+    ],
+    [
+      287,
+      5,
+      0,
+      3,
+      3,
+      "LATENT"
+    ],
+    [
+      289,
+      73,
+      0,
+      3,
+      0,
+      "MODEL"
+    ],
+    [
+      290,
+      39,
+      0,
+      3,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      291,
+      40,
+      0,
+      3,
+      2,
+      "CONDITIONING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7247295000000007,
+      "offset": [
+        1071.462641376637,
+        815.9044684916331
+      ]
+    },
+    "ue_links": []
+  },
+  "version": 0.4
+}

@@ -125,6 +125,9 @@ importers:
       uuid:
         specifier: ^11.0.5
         version: 11.0.5
+      uuidv7:
+        specifier: ^1.0.2
+        version: 1.0.2
       youtube-transcript:
         specifier: ^1.2.1
         version: 1.2.1
@@ -3218,6 +3221,10 @@ packages:
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+
+  uuidv7@1.0.2:
+    resolution: {integrity: sha512-8JQkH4ooXnm1JCIhqTMbtmdnYEn6oKukBxHn1Ic9878jMkL7daTI7anTExfY18VRCX7tcdn5quzvCb6EWrR8PA==}
     hasBin: true
 
   vfile-location@5.0.3:
@@ -7127,6 +7134,8 @@ snapshots:
   uuid@11.0.5: {}
 
   uuid@9.0.1: {}
+
+  uuidv7@1.0.2: {}
 
   vfile-location@5.0.3:
     dependencies:

@@ -6,6 +6,7 @@ import { Inter } from "next/font/google"
 import type React from "react" // Import React
 import { PostHogProvider } from './providers'
 const inter = Inter({ subsets: ["latin"] })
+import { getBootstrapData } from '../lib/getBootstrapData'
 
 // Add metadata export
 export const metadata = {
@@ -15,16 +16,17 @@ export const metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
+export default async function RootLayout({
+  children, 
 }: {
   children: React.ReactNode
 }) {
+  const bootstrapData = await getBootstrapData()
   return (
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <PostHogProvider>
+          <PostHogProvider bootstrapData={bootstrapData}>
             {children}
           </PostHogProvider>
         </body>

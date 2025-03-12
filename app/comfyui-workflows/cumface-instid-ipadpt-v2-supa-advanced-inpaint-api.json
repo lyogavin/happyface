@@ -1,0 +1,356 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 1631591742,
+      "steps": 31,
+      "cfg": 5.23,
+      "sampler_name": "ddpm",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "72",
+        0
+      ],
+      "positive": [
+        "60",
+        1
+      ],
+      "negative": [
+        "60",
+        2
+      ],
+      "latent_image": [
+        "76",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "halcyonSDXL_v19.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 1016,
+      "height": 1016,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "11": {
+    "inputs": {
+      "instantid_file": "SDXL/ip-adapter.bin"
+    },
+    "class_type": "InstantIDModelLoader",
+    "_meta": {
+      "title": "Load InstantID Model"
+    }
+  },
+  "15": {
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "16": {
+    "inputs": {
+      "control_net_name": "SDXL/instantid/diffusion_pytorch_model.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "38": {
+    "inputs": {
+      "provider": "CUDA"
+    },
+    "class_type": "InstantIDFaceAnalysis",
+    "_meta": {
+      "title": "InstantID Face Analysis"
+    }
+  },
+  "39": {
+    "inputs": {
+      "text": "orgasm, cum on her face",
+      "clip": [
+        "73",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "40": {
+    "inputs": {
+      "text": "photograph, deformed, glitch, noisy, realistic, stock photo",
+      "clip": [
+        "73",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "60": {
+    "inputs": {
+      "weight": 0.8,
+      "start_at": 0,
+      "end_at": 1,
+      "instantid": [
+        "11",
+        0
+      ],
+      "insightface": [
+        "38",
+        0
+      ],
+      "control_net": [
+        "16",
+        0
+      ],
+      "image": [
+        "94",
+        0
+      ],
+      "model": [
+        "73",
+        0
+      ],
+      "positive": [
+        "39",
+        0
+      ],
+      "negative": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "ApplyInstantID",
+    "_meta": {
+      "title": "Apply InstantID"
+    }
+  },
+  "68": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter_sdxl_vit-h.safetensors"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapter Model Loader"
+    }
+  },
+  "70": {
+    "inputs": {
+      "clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "72": {
+    "inputs": {
+      "weight": 0.97,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "60",
+        0
+      ],
+      "ipadapter": [
+        "68",
+        0
+      ],
+      "image": [
+        "94",
+        0
+      ],
+      "clip_vision": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "IPAdapter Advanced"
+    }
+  },
+  "73": {
+    "inputs": {
+      "lora_name": "orgasmface_SDXL.safetensors",
+      "strength_model": 0.9400000000000001,
+      "strength_clip": 1.01,
+      "model": [
+        "78",
+        0
+      ],
+      "clip": [
+        "78",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "76": {
+    "inputs": {
+      "grow_mask_by": 64,
+      "pixels": [
+        "94",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ],
+      "mask": [
+        "98",
+        0
+      ]
+    },
+    "class_type": "VAEEncodeForInpaint",
+    "_meta": {
+      "title": "VAE Encode (for Inpainting)"
+    }
+  },
+  "78": {
+    "inputs": {
+      "lora_name": "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
+      "strength_model": 1.5,
+      "strength_clip": 1.5,
+      "model": [
+        "4",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "91": {
+    "inputs": {
+      "supabase_url": "https://bjqbwtqznzladztznntj.supabase.co",
+      "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcWJ3dHF6bnpsYWR6dHpubnRqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwMjE3NjU1MywiZXhwIjoyMDE3NzUyNTUzfQ.X2TkE85qR9jjTDKvvzL0IM94a6fzakb6FjvCSs5uPk8",
+      "storage_bucket": "images",
+      "storage_path": "uploads/",
+      "filename_prefix": "comfy_",
+      "image": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SupabaseStorageUploader",
+    "_meta": {
+      "title": "Supabase Storage Uploader"
+    }
+  },
+  "92": {
+    "inputs": {
+      "output": "",
+      "source": [
+        "91",
+        0
+      ]
+    },
+    "class_type": "Display Any (rgthree)",
+    "_meta": {
+      "title": "Display Any (rgthree)"
+    }
+  },
+  "94": {
+    "inputs": {
+      "image_url": "https://bjqbwtqznzladztznntj.supabase.co/storage/v1/object/public/images/happyface_upload/0.6693395497277239.webp",
+      "recraft_api_key": "vu3IIbrQSCJXnx4Pxt2M3WixGGHIlD4G2vTTfKRw0c6yqi0jm7pF4RD5CNsS8pNv",
+      "max_retries": 3,
+      "retry_delay": 1
+    },
+    "class_type": "RecraftUpscale",
+    "_meta": {
+      "title": "Recraft Upscale"
+    }
+  },
+  "98": {
+    "inputs": {
+      "face": true,
+      "left_eyebrow": false,
+      "right_eyebrow": false,
+      "left_eye": false,
+      "right_eye": false,
+      "left_pupil": false,
+      "right_pupil": false,
+      "lips": false,
+      "number_of_faces": 1,
+      "confidence": 0.4,
+      "refine_mask": true,
+      "images": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "APersonFaceLandmarkMaskGenerator",
+    "_meta": {
+      "title": "A Person Face Landmark Mask Generator"
+    }
+  },
+  "99": {
+    "inputs": {
+      "mask": [
+        "98",
+        0
+      ]
+    },
+    "class_type": "MaskPreview+",
+    "_meta": {
+      "title": "🔧 Mask Preview"
+    }
+  }
+}

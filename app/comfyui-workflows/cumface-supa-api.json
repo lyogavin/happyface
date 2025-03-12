@@ -1,0 +1,174 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 1631591740,
+      "steps": 31,
+      "cfg": 5.23,
+      "sampler_name": "ddpm",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "73",
+        0
+      ],
+      "positive": [
+        "39",
+        0
+      ],
+      "negative": [
+        "40",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "halcyonSDXL_v19.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 1016,
+      "height": 1016,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "3",
+        0
+      ],
+      "vae": [
+        "4",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "15": {
+    "inputs": {
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "39": {
+    "inputs": {
+      "text": "orgasm, cum on her face",
+      "clip": [
+        "73",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "40": {
+    "inputs": {
+      "text": "photograph, deformed, glitch, noisy, realistic, stock photo",
+      "clip": [
+        "73",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "73": {
+    "inputs": {
+      "lora_name": "orgasmface_SDXL.safetensors",
+      "strength_model": 0.9400000000000001,
+      "strength_clip": 1.01,
+      "model": [
+        "78",
+        0
+      ],
+      "clip": [
+        "78",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "78": {
+    "inputs": {
+      "lora_name": "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
+      "strength_model": 1.5,
+      "strength_clip": 1.52,
+      "model": [
+        "4",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "91": {
+    "inputs": {
+      "supabase_url": "https://your-project-id.supabase.co",
+      "supabase_key": "your-supabase-key",
+      "storage_bucket": "images",
+      "storage_path": "uploads/",
+      "filename_prefix": "comfy_",
+      "image": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "SupabaseStorageUploader",
+    "_meta": {
+      "title": "Supabase Storage Uploader"
+    }
+  },
+  "92": {
+    "inputs": {
+      "output": "",
+      "source": [
+        "91",
+        0
+      ]
+    },
+    "class_type": "Display Any (rgthree)",
+    "_meta": {
+      "title": "Display Any (rgthree)"
+    }
+  }
+}
