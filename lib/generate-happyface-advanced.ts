@@ -39,8 +39,8 @@ export async function submitHappyFaceJobAdvanced(
   let workflow;
   let orgasmStrengthModelFactor = 1.0;
   let orgasmStrengthClipFactor = 1.0;
-  let cumStrengthModelFactor = 2.0;
-  let cumStrengthClipFactor = 2.0;
+  let cumStrengthModelFactor = 1.0;
+  let cumStrengthClipFactor = 1.0;
   
   if (sourceImageUrl) {
     
@@ -51,8 +51,8 @@ export async function submitHappyFaceJobAdvanced(
       workflow = JSON.parse(JSON.stringify(cumfaceInstidIpadapterInpaintWorkflow));
       orgasmStrengthModelFactor = 1.0;
       orgasmStrengthClipFactor = 1.0;
-      cumStrengthModelFactor = 2.0;
-      cumStrengthClipFactor = 2.0;
+      cumStrengthModelFactor = 1.0;
+      cumStrengthClipFactor = 1.0;
     } else {
       // Advanced workflow with source image
       workflow = JSON.parse(JSON.stringify(cumfaceInstidIpadapterWorkflow));

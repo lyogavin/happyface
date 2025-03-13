@@ -57,7 +57,7 @@ export default function EditorPage() {
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'pending' | 'processing' | 'completed' | 'error'>('idle')
   const [validationError, setValidationError] = useState<string | null>(null)
   const [showErrorDialog, setShowErrorDialog] = useState(false)
-  const [onlyModifyFace, setOnlyModifyFace] = useState(false)
+  const [onlyModifyFace, setOnlyModifyFace] = useState(true)
   const [expectedTotalTime, setExpectedTotalTime] = useState(88)
 
   const [featureFlagControl, setFeatureFlagControl] = useState(true)
@@ -65,7 +65,7 @@ export default function EditorPage() {
   useEffect(() => {
     const MOCK_LOCAL = true;
     if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
-      setFeatureFlagControl(true)
+      setFeatureFlagControl(false)
       setExpectedTotalTime(129)
     } else {
       const flag = posthog.getFeatureFlag('new-happyface-workflow')
@@ -572,7 +572,7 @@ export default function EditorPage() {
                                     onValueChange={(value) => setOrgasmStrength(value[0])}
                                   />
                                 </div>
-                                {/*!featureFlagControl && (
+                                {!featureFlagControl && (
                                   <div className="flex items-center space-x-2">
                                     <input
                                       type="checkbox"
@@ -584,7 +584,7 @@ export default function EditorPage() {
                                     />
                                     <Label htmlFor="only-modify-face">Only modify face</Label>
                                   </div>
-                                )}*/}
+                                )}
                               </div>
                             </AccordionContent>
                           </AccordionItem>

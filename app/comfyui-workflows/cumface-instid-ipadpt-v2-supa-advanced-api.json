@@ -166,7 +166,7 @@
     },
     "class_type": "ApplyInstantID",
     "_meta": {
-      "title": "Apply InstantID"
+      "title": "ZenID FaceSwap"
     }
   },
   "68": {
@@ -238,9 +238,9 @@
   },
   "78": {
     "inputs": {
-      "lora_name": "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
-      "strength_model": 1.5,
-      "strength_clip": 1.52,
+      "lora_name": "12a8a1b7b9a526e37ac5a1273b4eb971.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
       "model": [
         "4",
         0
@@ -298,8 +298,8 @@
   },
   "94": {
     "inputs": {
-      "image_url": "",
-      "recraft_api_key": "",
+      "image_url": "https://ritdyhnvqjzooqc3.public.blob.vercel-storage.com/1_lCwovmvUhKaXWa8g9UF13A-86t3NlEfX8R3ScAqthA73FTsdvUdfB.webp",
+      "recraft_api_key": "vu3IIbrQSCJXnx4Pxt2M3WixGGHIlD4G2vTTfKRw0c6yqi0jm7pF4RD5CNsS8pNv",
       "max_retries": 3,
       "retry_delay": 1
     },

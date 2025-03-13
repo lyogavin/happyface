@@ -429,61 +429,6 @@
       ]
     },
     {
-      "id": 78,
-      "type": "LoraLoader",
-      "pos": [
-        -322.3659973144531,
-        -133.2694549560547
-      ],
-      "size": [
-        591.855224609375,
-        169.05918884277344
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 258
-        },
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 259
-        }
-      ],
-      "outputs": [
-        {
-          "name": "MODEL",
-          "type": "MODEL",
-          "links": [
-            260
-          ],
-          "slot_index": 0
-        },
-        {
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            261
-          ],
-          "slot_index": 1
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.3.26",
-        "Node name for S&R": "LoraLoader"
-      },
-      "widgets_values": [
-        "_SDXL_Gooey_Cum_V2__Amateur_Thick_Facial_Cum_on_Her_Face_Cumshot_Deluxe_Detail_and_Hentai_Helper_.safetensors",
-        1.5,
-        1.52
-      ]
-    },
-    {
       "id": 73,
       "type": "LoraLoader",
       "pos": [
@@ -688,7 +633,7 @@
       ],
       "size": [
         172.29652404785156,
-        117.32195281982422
+        246
       ],
       "flags": {},
       "order": 18,
@@ -913,6 +858,61 @@
       ]
     },
     {
+      "id": 78,
+      "type": "LoraLoader",
+      "pos": [
+        -322.3659973144531,
+        -133.2694549560547
+      ],
+      "size": [
+        591.855224609375,
+        169.05918884277344
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 258
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 259
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            260
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            261
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.26",
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "12a8a1b7b9a526e37ac5a1273b4eb971.safetensors",
+        1,
+        1
+      ]
+    },
+    {
       "id": 94,
       "type": "RecraftUpscale",
       "pos": [
@@ -950,8 +950,8 @@
         "Node name for S&R": "RecraftUpscale"
       },
       "widgets_values": [
-        "",
-        "",
+        "https://ritdyhnvqjzooqc3.public.blob.vercel-storage.com/1_lCwovmvUhKaXWa8g9UF13A-86t3NlEfX8R3ScAqthA73FTsdvUdfB.webp",
+        "vu3IIbrQSCJXnx4Pxt2M3WixGGHIlD4G2vTTfKRw0c6yqi0jm7pF4RD5CNsS8pNv",
         3,
         1
       ]
@@ -1171,10 +1171,10 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.7247295000000005,
+      "scale": 0.5054470284993053,
       "offset": [
-        1529.20564683271,
-        504.7487523140866
+        887.7669211142434,
+        1481.3864928981925
       ]
     },
     "ue_links": []
