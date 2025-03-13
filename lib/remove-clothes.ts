@@ -179,10 +179,18 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
     // Add check for job error status
     if (data['status']?.status_str === 'error') {
       console.error('Job error', data['status']);
+      // try catch to set message in case format is not correct
+      let message = 'Unknown error';
+      try {
+        message = data[jobId]['status']['messages'][2][1]['exception_message'];
+      } catch (error) {
+        console.error('Error getting message', error);
+      }
       return {
         status: 'job_error',
         progress: 0,
-        currentStep: 'Error'
+        currentStep: 'Error',
+        message: message
       };
     }
 
@@ -347,4 +355,5 @@ type ComfyUIProgress = {
   progress: number;
   currentStep?: string;
   url?: string;
+  message?: string;
 };

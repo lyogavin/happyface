@@ -312,7 +312,13 @@ export default function EditorPage() {
             posthog.capture('generation_success', {'url': result.url})
           } else if (result.status === 'job_error') {
             posthog.capture('generation_job_error', {'error': result, 'source': 'job_error'})
-            setError('Failed to generate image, please try again.')
+
+            // if result.message contains 'No face detected' show that in message
+            if (result.message && result.message.includes('No face detected')) {
+              setError('No face detected in the uploaded image, please try again with a different image with a face.')
+            } else {
+              setError('Failed to generate image, please try again.')
+            }
             setIsGenerating(false)
             // don't stop checking status
             // setTimeout(checkStatus, 2000) // Check again in 2 seconds

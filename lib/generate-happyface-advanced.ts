@@ -265,10 +265,18 @@ export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string
 
     if (data['status']?.status_str === 'error') {
       console.error('Job error', data['status']);
+      // try catch to set message in case format is not correct
+      let message = 'Unknown error';
+      try {
+        message = data[jobId]['status']['messages'][2][1]['exception_message'];
+      } catch (error) {
+        console.error('Error getting message', error);
+      }
       return {
         status: 'job_error',
         progress: 0,
-        currentStep: 'Error'
+        currentStep: 'Error',
+        message: message
       };
     }
     // Check if job is completed - now looking for text output from Display Any node (92)
@@ -448,4 +456,5 @@ type ComfyUIProgress = {
   progress: number;
   currentStep?: string;
   url?: string;
+  message?: string;
 };
