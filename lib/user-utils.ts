@@ -38,6 +38,7 @@ export const getUserSubscriptionStatus = async (user_id: string) => {
   // Check if in local development
   const MOCK_LOCAL = true;
   if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
+    console.log("mock local development, returning active subscription for user", user_id);
     return { 
       status: 'active',
       type: 'pro',
@@ -117,18 +118,27 @@ export const getUserGenerations = async (user_id: string, feature: string, limit
     .eq('user_id', user_id)
     .eq('feature', feature)
     .order('created_at', { ascending: false })
-    .limit(limit); // Limit to most recent 20 generations
+    .limit(limit);
 
   if (error) {
     console.error("Error fetching user generations:", error);
     return [];
   }
 
-  return data.map(generation => ({
-    generation: generation.generation,
-    upload_image: generation.upload_image,
-    comfyui_prompt_id: generation.comfyui_prompt_id,
-    comfyui_server: generation.comfyui_server,
-    prompt: generation.prompt
-  }));
+  // Log job_error generations
+  const errorGenerations = data.filter(gen => gen.generation === 'job_error');
+  if (errorGenerations.length > 0) {
+    console.log("Found job_error generations:", errorGenerations);
+  }
+
+  // Filter out job_error generations from the returned data
+  return data
+    .filter(gen => gen.generation !== 'job_error')
+    .map(generation => ({
+      generation: generation.generation,
+      upload_image: generation.upload_image,
+      comfyui_prompt_id: generation.comfyui_prompt_id,
+      comfyui_server: generation.comfyui_server,
+      prompt: generation.prompt
+    }));
 };

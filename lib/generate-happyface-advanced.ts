@@ -263,6 +263,25 @@ export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string
 
     console.log('data', data, 'jobId', jobId);
 
+    // Add check for empty data
+    if (Object.keys(data).length === 0) {
+      try {
+        // Update generation status in database
+        await supabase.from('happyface_generations')
+          .update({ generation: 'job_error' })
+          .eq('comfyui_prompt_id', jobId);
+      } catch (dbError) {
+        console.error('Failed to update generation status in database:', dbError);
+      }
+      
+      return {
+        status: 'job_error',
+        progress: 0,
+        currentStep: 'Error',
+        message: 'Job not found.'
+      };
+    }
+
     if (data['status']?.status_str === 'error') {
       console.error('Job error', data['status']);
       // try catch to set message in case format is not correct
@@ -272,6 +291,16 @@ export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string
       } catch (error) {
         console.error('Error getting message', error);
       }
+
+      try {
+        // Update generation status in database
+        await supabase.from('happyface_generations')
+          .update({ generation: 'job_error' })
+          .eq('comfyui_prompt_id', jobId);
+      } catch (dbError) {
+        console.error('Failed to update generation status in database:', dbError);
+      }
+
       return {
         status: 'job_error',
         progress: 0,
