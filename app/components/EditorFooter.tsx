@@ -9,7 +9,7 @@ export function EditorFooter() {
             © {new Date().getFullYear()} Cum Face AI. All rights reserved.
           </div>
           <div className="flex gap-6">
-            <Link href="/terms" className="text-sm text-gray-500 hover:text-purple-600">
+            <Link href="/terms-of-use/index.html" className="text-sm text-gray-500 hover:text-purple-600">
               Terms of Service
             </Link>
             <Link href="/disclaimer" className="text-sm text-gray-500 hover:text-purple-600">
