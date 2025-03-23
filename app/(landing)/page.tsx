@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity } from "@tabler/icons-react"
+import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity, IconPhoto } from "@tabler/icons-react"
 import PricingSection from "@/components/pricing-section"
 import { GetCreditsButton } from "@/components/get-credits-button"
 import { Blog } from "@/components/blog/blog"
@@ -29,6 +29,9 @@ export default function LandingPage() {
             </Link>
             <Link href="#pricing" className="text-gray-600 hover:text-gray-900">
               Buy Credits
+            </Link>
+            <Link href="#nsfw-generator" className="text-gray-600 hover:text-gray-900">
+              NSFW Generator
             </Link>
           </nav>
           <GetCreditsButton />
@@ -197,6 +200,73 @@ export default function LandingPage() {
                     height={300}
                     className="rounded-lg"
                   />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* NSFW Generator Section */}
+        <section id="nsfw-generator" className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+            <h2 className="text-3xl font-extrabold text-center mb-8">Explore Our NSFW Image Generator</h2>
+            <p className="text-xl text-center text-gray-600 max-w-3xl mx-auto mb-12">
+              Transform your images into stunning NSFW content or create entirely new adult imagery from text prompts. Our advanced AI delivers unparalleled quality with powerful image-to-image capabilities.
+            </p>
+            <div className="flex justify-center mb-12">
+              <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Link href="/NSFW-generator" className="flex items-center gap-2">
+                  <IconPhoto className="w-5 h-5 text-white" />
+                  Try NSFW Generator
+                </Link>
+              </Button>
+            </div>
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <h3 className="text-xl font-bold mb-4">High-Quality Results</h3>
+                  <p className="text-gray-600 mb-4">
+                    Generate high-resolution NSFW images up to 8K for crystal-clear adult content with remarkable realism.
+                  </p>
+                  <div className="aspect-[16/9] relative overflow-hidden rounded-lg">
+                    <Image
+                      src="/8k-sign.png"
+                      alt="NSFW Generator Example"
+                      layout="fill"
+                      objectFit="cover"
+                      className="hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <h3 className="text-xl font-bold mb-4">Powerful Image-to-Image</h3>
+                  <p className="text-gray-600 mb-4">
+                    Upload your own reference images and transform them into stunning NSFW content with our advanced AI technology.
+                  </p>
+                  <div className="aspect-[16/9] relative overflow-hidden rounded-lg">
+                    <Image
+                      src="/img2img.png"
+                      alt="NSFW Generator Image to Image"
+                      layout="fill"
+                      objectFit="cover"
+                      className="hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md">
+                  <h3 className="text-xl font-bold mb-4">Multiple Styles</h3>
+                  <p className="text-gray-600 mb-4">
+                    Choose between hyper-realistic nudes or anime-inspired NSFW art. Specialized options for different body types, poses, and styles.
+                  </p>
+                  <div className="aspect-[16/9] relative overflow-hidden rounded-lg">
+                    <Image
+                      src="/anime-large.png"
+                      alt="NSFW Generator Customization"
+                      layout="fill"
+                      objectFit="cover"
+                      className="hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

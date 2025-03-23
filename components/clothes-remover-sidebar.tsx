@@ -54,10 +54,10 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
       href: "/clothes-remover"
     },
     {
-      id: "nsfw-editor",
-      label: "NSFW Editor(Coming Soon)",
+      id: "NSFW-Generator",
+      label: "NSFW Generator",
       icon: IconLock,
-      href: ""
+      href: "/NSFW-generator"
     },
     {
       id: "ai-onlyfans-creator",

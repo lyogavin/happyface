@@ -6,6 +6,7 @@ export const appConfig = {
   url: process.env.NEXT_PUBLIC_APP_URL || "https://cumfaceai.com",
   comfyuiHost: 'http://172.190.96.238:8080', //45.18.173.26:41040', // third backend server
   comfyuiHostClothesRemover: 'http://172.190.96.238:8080', // 27.75.143.67:43691', // fourth backend server
+  comfyuiHostNsfwGenerator: 'http://172.190.96.238:8080', // 27.75.143.67:43691', // fourth backend server
   freeCredits: 3,
   prices: [
     {

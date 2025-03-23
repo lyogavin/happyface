@@ -313,7 +313,8 @@ export default function ClothesRemoverPage() {
                 comfyui_prompt_id: jobId, 
                 comfyui_server: '', 
                 prompt: prompt,
-                mask_image: maskImage || ''
+                mask_image: maskImage || '',
+                reference_images: []
               }
             ])
             setIsGenerating(false)
@@ -523,8 +524,8 @@ export default function ClothesRemoverPage() {
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <SidebarTrigger />
-                <Link href="/" className="text-xl font-bold text-purple-600">
-                  Clothes Remover AI
+                <Link href="/" className="text-base md:text-xl font-bold text-purple-600">
+                  Clothes Remover
                 </Link>
               </div>
               <div className="flex items-center space-x-4">

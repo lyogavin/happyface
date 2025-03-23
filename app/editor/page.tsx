@@ -299,7 +299,8 @@ export default function EditorPage() {
                 upload_image: uploadedImage || '', 
                 comfyui_prompt_id: jobId, 
                 comfyui_server: '', 
-                prompt: prompt 
+                prompt: prompt,
+                reference_images: [] 
               }
             ])
             setIsGenerating(false)
@@ -479,7 +480,7 @@ export default function EditorPage() {
             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <SidebarTrigger />
-                <Link href="/" className="text-xl font-bold text-purple-600">
+                <Link href="/" className="text-base md:text-xl font-bold text-purple-600">
                   Cum Face AI
                 </Link>
               </div>
@@ -491,7 +492,7 @@ export default function EditorPage() {
           </nav>
           
           {/* Main content */}
-          <div className="flex-1 p-8 overflow-auto">
+          <div className="flex-1 px-0 md:px-8 py-8 overflow-auto">
             <div className="container mx-auto max-w-[1600px]">
               <CreditPurchaseDialog />
               

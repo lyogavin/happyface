@@ -4,7 +4,7 @@ import { useUser } from "@clerk/nextjs"
 import { getUserSubscriptionStatus } from "@/lib/user-utils"
 import { useState, useEffect } from "react"
 
-export function CreditsBadge({ isGenerating }: { isGenerating: boolean }) {
+export function CreditsBadge({ isGenerating = false }: { isGenerating?: boolean }) {
   const { user, isLoaded } = useUser();
   const [credits, setCredits] = useState<number | null>(null);
 
@@ -30,11 +30,11 @@ export function CreditsBadge({ isGenerating }: { isGenerating: boolean }) {
 
   return (
     <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
-      <IconCoin className="h-5 w-5 text-yellow-500" />
+      <IconCoin className="h-5 w-5 text-yellow-500 text-xs md:text-base" />
       {credits === null ? (
         <IconLoader2 className="h-4 w-4 animate-spin text-gray-500" />
       ) : (
-        <span className="text-gray-700">{credits} credits</span>
+        <span className="text-gray-700 text-xs md:text-base">{credits} credits</span>
       )}
     </div>
   );

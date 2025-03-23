@@ -109,12 +109,13 @@ export type UserGeneration = {
   comfyui_prompt_id: string;
   comfyui_server: string;
   prompt: string;
+  reference_images: string[];
 }
 
 export const getUserGenerations = async (user_id: string, feature: string, limit: number = 20): Promise<UserGeneration[]> => {
   const { data, error } = await supabaseClient
     .from('happyface_generations')
-    .select('generation, upload_image, comfyui_prompt_id, comfyui_server, prompt')
+    .select('generation, upload_image, comfyui_prompt_id, comfyui_server, prompt, reference_images')
     .eq('user_id', user_id)
     .eq('feature', feature)
     .order('created_at', { ascending: false })
@@ -131,14 +132,13 @@ export const getUserGenerations = async (user_id: string, feature: string, limit
     console.log("Found job_error generations:", errorGenerations);
   }
 
-  // Filter out job_error generations from the returned data
-  return data
-    .filter(gen => gen.generation !== 'job_error')
-    .map(generation => ({
-      generation: generation.generation,
-      upload_image: generation.upload_image,
-      comfyui_prompt_id: generation.comfyui_prompt_id,
-      comfyui_server: generation.comfyui_server,
-      prompt: generation.prompt
-    }));
+  // Return all generations, including job_error ones
+  return data.map(generation => ({
+    generation: generation.generation,
+    upload_image: generation.upload_image,
+    comfyui_prompt_id: generation.comfyui_prompt_id,
+    comfyui_server: generation.comfyui_server,
+    prompt: generation.prompt,
+    reference_images: generation.reference_images || []
+  }));
 };
