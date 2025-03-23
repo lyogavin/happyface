@@ -41,9 +41,9 @@ export function GeneratedImage({ currentImage, isGenerating, generationStatus }:
       <CardContent className="pt-6 flex-1 flex flex-col">
         <p className="text-xl font-semibold mb-4">Generated NSFW Image</p>
 
-        <div className="relative flex-1 bg-muted rounded-md flex items-center justify-center mb-4 min-h-[300px]">
+        <div className="relative flex-1 bg-muted rounded-md flex items-center justify-center mb-4 overflow-hidden" style={{ maxHeight: "500px" }}>
           {isGenerating ? (
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center h-[400px]">
               <Loader2 className="h-8 w-8 animate-spin mb-2 text-primary" />
               <p className="text-sm text-center text-muted-foreground">
                 {generationStatus === 'pending' 
@@ -52,18 +52,18 @@ export function GeneratedImage({ currentImage, isGenerating, generationStatus }:
               </p>
             </div>
           ) : currentImage ? (
-            <div className="relative w-full h-full flex items-center justify-center">
+            <div className="relative w-full h-full flex items-center justify-center" style={{ maxHeight: "500px" }}>
               <img
                 src={currentImage}
                 alt="Generated NSFW image"
-                className="max-h-full max-w-full object-contain"
+                className="max-h-[500px] max-w-full object-contain"
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center h-[400px]">
               <div className="relative flex items-center justify-center">
                 <img
-                  src="/placeholder.svg?height=400&width=400"
+                  src="/placeholder.svg?height=400&width=500"
                   alt="Generated image will appear here"
                   className="max-h-full max-w-full object-contain opacity-50"
                 />

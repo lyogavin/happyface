@@ -25,6 +25,7 @@ import { IconCoin, IconLoader2, IconChevronDown } from '@tabler/icons-react'
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import Image from "next/image"
 
 // Import for type
 import { UserGeneration } from "@/lib/user-utils"
@@ -425,15 +426,15 @@ export default function Home() {
 
             <CreditPurchaseDialog />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-              {/* Left Column - Input Controls */}
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-10">
+              {/* Left Column - Input Controls (narrower) */}
+              <div className="md:col-span-5 space-y-6">
                 <Card>
                   <CardContent className="pt-6">
                     <p className="text-xl font-semibold mb-4">Enter Your Prompt</p>
                     <Textarea 
                       placeholder="Describe what you want to generate..." 
-                      className="min-h-[120px] mb-4"
+                      className="min-h-[200px] mb-4"
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                     />
@@ -542,12 +543,33 @@ export default function Home() {
                 </Card>
               </div>
 
-              {/* Right Column - Generated Image */}
-              <GeneratedImage 
-                currentImage={currentImage} 
-                isGenerating={isGenerating} 
-                generationStatus={generationStatus} 
-              />
+              {/* Right Column - Generated Image (wider) */}
+              <div className="md:col-span-7 flex flex-col space-y-4">
+                {/* Add banner above the GeneratedImage component */}
+                <Card>
+                  <CardContent className="p-0 overflow-hidden rounded-lg">
+                    <div className="relative aspect-[1920/480]">
+                      <Image
+                        src="/nsfw-banner.jpg"
+                        alt="NSFW Generator Banner"
+                        layout="fill"
+                        objectFit="cover"
+                        className="w-full"
+                        priority
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Wrap GeneratedImage to ensure proper spacing */}
+                <div className="pb-4">
+                  <GeneratedImage 
+                    currentImage={currentImage} 
+                    isGenerating={isGenerating} 
+                    generationStatus={generationStatus} 
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Generation History */}
