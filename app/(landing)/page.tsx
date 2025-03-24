@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity, IconPhoto } from "@tabler/icons-react"
+import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity, IconPhoto, IconApi, IconCode } from "@tabler/icons-react"
 import PricingSection from "@/components/pricing-section"
 import { GetCreditsButton } from "@/components/get-credits-button"
 import { Blog } from "@/components/blog/blog"
@@ -291,6 +291,57 @@ export default function LandingPage() {
                 <source src="https://ritdyhnvqjzooqc3.public.blob.vercel-storage.com/0204-fiBcevMbLHNPH4g1vzCteXXZX94gsr.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+            </div>
+          </div>
+        </section>
+
+        {/* API Section */}
+        <section className="py-12 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-extrabold text-center mb-6">Developer API Access</h2>
+            <p className="text-center text-gray-600 max-w-3xl mx-auto mb-8">
+              Integrate our powerful NSFW AI technologies directly into your applications with our developer-friendly APIs.
+            </p>
+            
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow-md text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconApi className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Cum Face Generator API</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Generate realistic cum faces programmatically through simple API calls.
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-md text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconCode className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">Clothes Remover API</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Access our clothes removal technology with robust API integration options.
+                </p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-xl shadow-md text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconPhoto className="w-6 h-6 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-bold mb-2">NSFW Generator API</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  Create high-quality NSFW content at scale with our flexible API solutions.
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-center mt-8">
+              <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Link href="/ai-nsfw-api" className="flex items-center gap-2">
+                  <IconApi className="w-5 h-5" />
+                  Explore API Documentation
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

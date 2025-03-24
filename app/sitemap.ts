@@ -23,5 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: 'https://www.cumfaceai.com/NSFW-generator',
       lastModified: new Date(),
     },
+    {
+      url: 'https://www.cumfaceai.com/ai-nsfw-api',
+      lastModified: new Date(),
+    },
   ]
 }
