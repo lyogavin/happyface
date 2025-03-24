@@ -1,5 +1,6 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import { createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/plans(.*)', '/sign-up(.*)', '/', '/#(.*)', '/sitemap.xml', 
   '/api/webhook/stripe(.*)', '/api/cog-webhook(.*)', '/clothes-remover(.*)', '/terms', '/disclaimer',
@@ -8,6 +9,14 @@ const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/plans(.*)', '/sign-u
 
   
 export default clerkMiddleware(async (auth, request) => {
+    // Check if the domain is ainsfwapi.com and reroute to /ai-nsfw-api
+    const hostname = request.headers.get('host');
+    if (hostname?.includes('ainsfwapi.com')) {
+      const url = new URL('/ai-nsfw-api', request.url);
+      console.log('Rewriting to /ai-nsfw-api');
+      return NextResponse.rewrite(url);
+    }
+
     if (!isPublicRoute(request)) {
       const authObject = await auth();
       if (!authObject.userId) {
