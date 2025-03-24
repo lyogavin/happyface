@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   
   // Determine the canonical URL based on the host
   const canonicalUrl = host.includes('ainsfwapi.com')
-    ? "https://ainsfwapi.com/ai-nsfw-api"
+    ? "https://ainsfwapi.com/"
     : "https://www.cumfaceai.com/ai-nsfw-api";
 
   return {
