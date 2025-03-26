@@ -58,21 +58,9 @@ export default function EditorPage() {
   const [validationError, setValidationError] = useState<string | null>(null)
   const [showErrorDialog, setShowErrorDialog] = useState(false)
   const [onlyModifyFace, setOnlyModifyFace] = useState(true)
+  const [facePlusHair, setFacePlusHair] = useState(false)
   const [expectedTotalTime, setExpectedTotalTime] = useState(88)
 
-  const [featureFlagControl, setFeatureFlagControl] = useState(true)
-
-  useEffect(() => {
-    const MOCK_LOCAL = true;
-    if (MOCK_LOCAL && process.env.NODE_ENV === 'development') {
-      setFeatureFlagControl(false)
-      setExpectedTotalTime(129)
-    } else {
-      const flag = posthog.getFeatureFlag('new-happyface-workflow')
-      setFeatureFlagControl(flag === 'control')
-      setExpectedTotalTime(88)
-    }
-  }, [])
 
   // Add useEffect to load historical generations
   useEffect(() => {
@@ -135,14 +123,7 @@ export default function EditorPage() {
         
         try {
           // Call the appropriate status checking function based on featureFlagControl
-          const status = featureFlagControl
-            ? await checkHappyFaceStatus(
-                gen.comfyui_prompt_id,
-                userId,
-                gen.upload_image,
-                gen.prompt || ''
-              )
-            : await checkHappyFaceStatusAdvanced(
+          const status = await checkHappyFaceStatusAdvanced(
                 gen.comfyui_prompt_id,
                 userId,
                 gen.upload_image,
@@ -221,26 +202,18 @@ export default function EditorPage() {
         async () => {
           let result;
           
-          if (featureFlagControl) {
-            // Use the standard version
-            result = await submitHappyFaceJob(
-              userId || '', 
-              uploadedImage, 
-              prompt,
-              cumStrength,
-              orgasmStrength
-            )
-          } else {
-            // Use the advanced version
-            result = await submitHappyFaceJobAdvanced(
-              userId || '', 
-              uploadedImage, 
-              prompt,
-              cumStrength,
-              orgasmStrength,
-              onlyModifyFace
-            )
-          }
+
+          // Use the advanced version
+          result = await submitHappyFaceJobAdvanced(
+            userId || '', 
+            uploadedImage, 
+            prompt,
+            cumStrength,
+            orgasmStrength,
+            onlyModifyFace,
+            facePlusHair
+          )
+          
           
           // Handle specific error cases that shouldn't be retried
           if (result === 'Insufficient credits') {
@@ -282,9 +255,7 @@ export default function EditorPage() {
 
       const checkStatus = async () => {
         try {
-          const result = featureFlagControl 
-            ? await checkHappyFaceStatus(jobId, userId || '', uploadedImage, prompt)
-            : await checkHappyFaceStatusAdvanced(jobId, userId || '', uploadedImage, prompt);
+          const result = await checkHappyFaceStatusAdvanced(jobId, userId || '', uploadedImage, prompt);
           
           if (result.status === 'completed' && result.url) {
             const endTime = new Date()
@@ -573,19 +544,34 @@ export default function EditorPage() {
                                     onValueChange={(value) => setOrgasmStrength(value[0])}
                                   />
                                 </div>
-                                {!featureFlagControl && (
-                                  <div className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
-                                      id="only-modify-face"
-                                      checked={onlyModifyFace}
-                                      onChange={(e) => setOnlyModifyFace(e.target.checked)}
-                                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                      disabled={!uploadedImage}
-                                    />
-                                    <Label htmlFor="only-modify-face">Only modify face</Label>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        id="only-modify-face"
+                                        checked={onlyModifyFace}
+                                        onChange={(e) => setOnlyModifyFace(e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={!uploadedImage}
+                                      />
+                                      <Label htmlFor="only-modify-face">Only modify face</Label>
+                                      
+                                      {onlyModifyFace && (
+                                        <div className="ml-4">
+                                          <select
+                                            id="face-modification-type"
+                                            className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                            value={facePlusHair ? "face-hair" : "face-only"}
+                                            onChange={(e) => setFacePlusHair(e.target.value === "face-hair")}
+                                            disabled={!onlyModifyFace}
+                                          >
+                                            <option value="face-only">Face only</option>
+                                            <option value="face-hair">Face + hair</option>
+                                          </select>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                )}
                               </div>
                             </AccordionContent>
                           </AccordionItem>

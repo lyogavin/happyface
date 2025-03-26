@@ -166,7 +166,7 @@
     },
     "class_type": "ApplyInstantID",
     "_meta": {
-      "title": "ZenID FaceSwap"
+      "title": "Apply InstantID"
     }
   },
   "68": {
@@ -248,7 +248,7 @@
         2
       ],
       "mask": [
-        "98",
+        "106",
         0
       ]
     },
@@ -376,7 +376,7 @@
         0
       ],
       "mask": [
-        "98",
+        "106",
         0
       ]
     },
@@ -441,6 +441,37 @@
     "class_type": "PreviewImage",
     "_meta": {
       "title": "Preview Image"
+    }
+  },
+  "106": {
+    "inputs": {
+      "face_mask": true,
+      "background_mask": false,
+      "hair_mask": true,
+      "body_mask": false,
+      "clothes_mask": false,
+      "confidence": 0.4,
+      "refine_mask": true,
+      "images": [
+        "94",
+        0
+      ]
+    },
+    "class_type": "APersonMaskGenerator",
+    "_meta": {
+      "title": "A Person Mask Generator"
+    }
+  },
+  "108": {
+    "inputs": {
+      "mask": [
+        "106",
+        0
+      ]
+    },
+    "class_type": "MaskPreview+",
+    "_meta": {
+      "title": "🔧 Mask Preview"
     }
   }
 }

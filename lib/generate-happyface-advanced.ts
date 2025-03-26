@@ -26,9 +26,10 @@ export async function submitHappyFaceJobAdvanced(
   prompt?: string,
   cumStrength?: number,
   orgasmStrength?: number, 
-  onlyModifyFace?: boolean
+  onlyModifyFace?: boolean,
+  facePlusHair?: boolean
 ): Promise<string> {
-  console.log('submitHappyFaceJob', userId, sourceImageUrl, prompt, cumStrength, orgasmStrength, onlyModifyFace);
+  console.log('submitHappyFaceJob', userId, sourceImageUrl, prompt, cumStrength, orgasmStrength, onlyModifyFace, facePlusHair);
 
   // Check user subscription status first
   const subscription = await getUserSubscriptionStatus(userId);
@@ -44,7 +45,6 @@ export async function submitHappyFaceJobAdvanced(
   
   if (sourceImageUrl) {
     
-
     // Connect the appropriate mask based on onlyModifyFace parameter
     if (onlyModifyFace) {
       // Advanced workflow with source image
@@ -53,6 +53,15 @@ export async function submitHappyFaceJobAdvanced(
       orgasmStrengthClipFactor = 1.0;
       cumStrengthModelFactor = 1.0;
       cumStrengthClipFactor = 1.0;
+      
+      // Configure face and hair mask based on facePlusHair parameter
+      if (facePlusHair && workflow[106] && workflow[106].inputs) {
+        workflow[106].inputs.face_mask = true;
+        workflow[106].inputs.hair_mask = true;
+      } else if (workflow[106] && workflow[106].inputs) {
+        workflow[106].inputs.face_mask = true;
+        workflow[106].inputs.hair_mask = false;
+      }
     } else {
       // Advanced workflow with source image
       workflow = JSON.parse(JSON.stringify(cumfaceInstidIpadapterWorkflow));
