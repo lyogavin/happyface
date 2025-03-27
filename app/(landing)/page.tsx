@@ -405,6 +405,28 @@ export default function LandingPage() {
               <p className="mt-2 text-sm text-gray-400">Bringing smiles to the world, one face at a time.</p>
             </div>
             <nav className="flex flex-wrap justify-center md:justify-end gap-4">
+              {/* Other Info Dropdown */}
+              <div className="relative group">
+                <button className="text-sm hover:text-gray-300 flex items-center gap-1">
+                  Other Info
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                <div className="absolute bottom-full mb-2 right-0 bg-gray-700 rounded-md shadow-lg w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="py-1">
+                    <a 
+                      href="https://how-to-generate-cum-face.vercel.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-600"
+                    >
+                      How to Generate Cum Face
+                    </a>
+                    {/* Add more dropdown links here as needed */}
+                  </div>
+                </div>
+              </div>
               <Link href="/terms-of-use/index.html" className="text-sm hover:text-gray-300">
                 Terms of Service
               </Link>
