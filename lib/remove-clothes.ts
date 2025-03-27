@@ -17,12 +17,15 @@ export async function submitRemoveClothesJob(
   userId: string,
   sourceImageUrl: string,
   maskImageUrl: string,
-  prompt?: string
+  prompt?: string,
+  highQuality?: boolean
 ): Promise<string> {
-  console.log('submitRemoveClothesJob', userId, sourceImageUrl, maskImageUrl, prompt);
+  console.log('submitRemoveClothesJob', userId, sourceImageUrl, maskImageUrl, prompt, highQuality);
   // Check user subscription status first
   const subscription = await getUserSubscriptionStatus(userId);
-  if (!subscription || subscription.credits < 1) {
+  // If high quality is enabled, check if user has at least 2 credits
+  const requiredCredits = highQuality ? 2 : 1;
+  if (!subscription || subscription.credits < requiredCredits) {
     return 'Insufficient credits';
   }
 
@@ -83,6 +86,7 @@ export async function submitRemoveClothesJob(
         comfyui_prompt_id: data.prompt_id,
         comfyui_server: COMFY_API_HOST,
         feature: 'clothes-remover',
+        high_quality: highQuality || false
       });
       
       if (dbError) {
@@ -115,7 +119,7 @@ export async function submitRemoveClothesJob(
   throw new Error('Unexpected error in job submission');
 }
 
-export async function checkRemoveClothesStatus(jobId: string, userId: string, sourceImageUrl: string, prompt: string): Promise<ComfyUIProgress> {
+export async function checkRemoveClothesStatus(jobId: string, userId: string, sourceImageUrl: string, prompt: string, highQuality: boolean = false): Promise<ComfyUIProgress> {
   try {
     // Check queue status first
     const queueResponse = await fetch(`${COMFY_API_HOST}/queue`, {
@@ -240,12 +244,14 @@ export async function checkRemoveClothesStatus(jobId: string, userId: string, so
           // log handle remove clothes generation time
           const handleStartTime = new Date();
           // call supabase rpc to save result and decrease credits
-          const { error: rpcError } = await supabase.rpc('handle_clothes_remover', {
+          const { error: rpcError } = await supabase.rpc('handle_clothes_remover_with_credits', {
             p_user_id: userId,
             p_source_image_url: sourceImageUrl,
             p_prompt: prompt,
             p_result_image_url: imageUrl,
             p_comfyui_prompt_id: jobId,
+            p_credits: highQuality ? 2 : 1,
+            p_result_image_hq_url: ''
           });
           const handleEndTime = new Date();
           const handleTime = handleEndTime.getTime() - handleStartTime.getTime();

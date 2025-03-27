@@ -1,9 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, Download } from "lucide-react"
 import { UserGeneration } from "@/lib/user-utils"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import posthog from 'posthog-js'
+import DownloadDialog from "@/components/download-dialog"
 
 interface GenerationHistoryProps {
   historicalImages: (UserGeneration & {
@@ -19,6 +22,9 @@ export function GenerationHistory({ historicalImages, isLoading }: GenerationHis
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [sortedImages, setSortedImages] = useState<UserGeneration[]>([])
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [currentImage, setCurrentImage] = useState<string | null>(null)
+  const [currentImageHQ, setCurrentImageHQ] = useState<boolean>(false)
   
   // Sort images by creation time when historicalImages changes
   useEffect(() => {
@@ -63,6 +69,38 @@ export function GenerationHistory({ historicalImages, isLoading }: GenerationHis
     
     setSortedImages(sorted);
   }, [historicalImages]);
+
+  const handleDownloadClick = (generation: UserGeneration) => {
+    if (generation.generation) {
+      if (generation.generation_hq) {
+        // If there's already an HQ version, open it directly
+        window.open(generation.generation_hq, '_blank')
+        posthog.capture('download_image', {
+          'image_url': generation.generation_hq,
+          'source': 'history',
+          'type': 'hq'
+        })
+      }
+      else if (generation.credits === 2) {
+        // For HQ generations (identified by credits=2), show the download dialog
+        setCurrentImage(generation.generation)
+        setCurrentImageHQ(true)
+        setShowDownloadDialog(true)
+        posthog.capture('download_dialog_open', {
+          'image_url': generation.generation,
+          'source': 'history'
+        })
+      } else {
+        // For regular quality images, download directly
+        window.open(generation.generation, '_blank')
+        posthog.capture('download_image', {
+          'image_url': generation.generation,
+          'source': 'history',
+          'type': 'standard'
+        })
+      }
+    }
+  }
 
   if (isLoading) {
     return (
@@ -109,6 +147,12 @@ export function GenerationHistory({ historicalImages, isLoading }: GenerationHis
         )}
       </p>
       
+      <DownloadDialog 
+        isOpen={showDownloadDialog}
+        onClose={() => setShowDownloadDialog(false)}
+        imageUrl={currentImage || undefined}
+      />
+      
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {sortedImages.map((generation, index) => (
           <Card key={index} className="overflow-hidden">
@@ -120,15 +164,27 @@ export function GenerationHistory({ historicalImages, isLoading }: GenerationHis
                   <p className="text-xs text-red-500 mt-1">Please try again</p>
                 </div>
               ) : generation.generation ? (
-                <img
-                  src={generation.generation}
-                  alt={`Generated Image ${index + 1}`}
-                  className="object-cover w-full h-full cursor-pointer"
-                  onClick={() => {
-                    setSelectedImage(generation.generation);
-                    setDialogOpen(true);
-                  }}
-                />
+                <div className="relative w-full h-full">
+                  <img
+                    src={generation.generation}
+                    alt={`Generated Image ${index + 1}`}
+                    className="object-cover w-full h-full cursor-pointer"
+                    onClick={() => {
+                      setSelectedImage(generation.generation);
+                      setDialogOpen(true);
+                    }}
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="rounded-full bg-white/80 hover:bg-white"
+                      onClick={() => handleDownloadClick(generation)}
+                    >
+                      <Download className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
               ) : generation.comfyui_prompt_id ? (
                 <div className="w-full h-full flex flex-col items-center justify-center animate-pulse">
                   <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
@@ -161,20 +217,24 @@ export function GenerationHistory({ historicalImages, isLoading }: GenerationHis
                 className="w-full h-auto rounded-lg"
               />
               <div className="absolute bottom-4 right-4">
-                <a 
-                  href={selectedImage} 
-                  download="generated-image.png"
-                  className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-3 py-2 text-sm font-medium"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Button 
+                  onClick={() => {
+                    // Find the generation object for this image
+                    const generation = sortedImages.find(gen => gen.generation === selectedImage);
+                    if (generation) {
+                      handleDownloadClick(generation);
+                    } else {
+                      // Fallback to direct download if generation not found
+                      window.open(selectedImage, '_blank');
+                    }
+                    // Close the dialog
+                    setDialogOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-download">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
+                  <Download className="h-4 w-4" />
                   Download
-                </a>
+                </Button>
               </div>
             </div>
           )}

@@ -7,6 +7,14 @@ import { getUserSubscriptionStatus } from './user-utils'
 import nsfwGenerationWorkflowWithRef from '@/app/comfyui-workflows/flux-nsfw-pulid-upload-api.json'
 import nsfwGenerationWorkflowNoRef from '@/app/comfyui-workflows/flux-nsfw-upload-api.json'
 
+// Define JobStatusResponse interface
+interface JobStatusResponse {
+  status: string;
+  result?: string;
+  message?: string;
+  url?: string;
+}
+
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,7 +29,8 @@ export async function submitNsfwGenerationJob(
   prompt: string,
   optimizeForSm: boolean = false,
   width: number = 1152,
-  height: number = 896
+  height: number = 896,
+  highQuality: boolean = false
 ): Promise<string> {
   try {
     if (!userId) {
@@ -30,7 +39,9 @@ export async function submitNsfwGenerationJob(
     
     // Check user subscription status first
     const subscription = await getUserSubscriptionStatus(userId);
-    if (!subscription || subscription.credits < 1) {
+    // If high quality is enabled, check if user has at least 2 credits
+    const requiredCredits = highQuality ? 2 : 1;
+    if (!subscription || subscription.credits < requiredCredits) {
       return 'Insufficient credits';
     }
 
@@ -163,6 +174,7 @@ export async function submitNsfwGenerationJob(
           comfyui_prompt_id: data.prompt_id,
           comfyui_server: COMFY_API_HOST,
           feature: 'nsfw-generator',
+          credits: highQuality ? 2 : 1
         });
         
         if (dbError) {
@@ -199,16 +211,18 @@ export async function submitNsfwGenerationJob(
     throw error;
   }
 }
+
 export async function checkNsfwGenerationStatus(
-  jobId: string,
+  jobId: string, 
   userId: string,
   referenceImages: string[],
   prompt: string,
   optimizeForSm: boolean = false,
   width: number = 1152,
-  height: number = 896
+  height: number = 896,
+  highQuality: boolean = false
 ): Promise<{ status: string; url?: string }> {
-  console.log('checkNsfwGenerationStatus', jobId, userId, referenceImages, prompt, optimizeForSm, width, height);
+  console.log('checkNsfwGenerationStatus', jobId, userId, referenceImages, prompt, optimizeForSm, width, height, highQuality);
   try {
     if (!jobId || !userId) {
       throw new Error("Job ID and User ID are required");
@@ -218,7 +232,7 @@ export async function checkNsfwGenerationStatus(
     const queueResponse = await fetch(`${COMFY_API_HOST}/queue`, {
       signal: AbortSignal.timeout(15000) // 15 seconds timeout
     });
-    
+
     if (!queueResponse.ok) {
       console.error('Failed to check queue status', queueResponse);
       return {
@@ -360,12 +374,14 @@ export async function checkNsfwGenerationStatus(
             // log handle nsfw generation time
             const handleStartTime = new Date();
             // call supabase rpc to save result and decrease credits
-            const { error: rpcError } = await supabase.rpc('handle_nsfw_generation', {
+            const { error: rpcError } = await supabase.rpc('handle_nsfw_generation_with_credits', {
               p_user_id: userId,
               p_reference_images: referenceImages,
               p_prompt: prompt,
               p_result_image_url: imageUrl,
               p_comfyui_prompt_id: jobId,
+              p_credits: highQuality ? 2 : 1,
+              p_result_image_hq_url: ''
             });
             const handleEndTime = new Date();
             const handleTime = handleEndTime.getTime() - handleStartTime.getTime();

@@ -40,6 +40,7 @@ import { EditorFooter } from "@/app/components/EditorFooter"
 import { ClothesRemoverLanding } from "@/app/components/clothes-remover-landing"
 import { validateImage } from "@/lib/image-checker"
 import pRetry, { AbortError } from 'p-retry'
+import DownloadDialog from "@/components/download-dialog"
 
 export default function ClothesRemoverPage() {
   const { user, isLoaded } = useUser()
@@ -59,7 +60,10 @@ export default function ClothesRemoverPage() {
   const [generationStatus, setGenerationStatus] = useState<'idle' | 'pending' | 'processing' | 'completed' | 'error'>('idle')
   const [validationError, setValidationError] = useState<string | null>(null)
   const [showErrorDialog, setShowErrorDialog] = useState(false)
-
+  const [highQuality, setHighQuality] = useState(false)
+  const [currentImageHQ, setCurrentImageHQ] = useState(false)
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [downloadDialogImage, setDownloadDialogImage] = useState<string | null>(null)
   // Add useEffect to load historical generations
   useEffect(() => {
     const loadHistoricalGenerations = async () => {
@@ -208,7 +212,8 @@ export default function ClothesRemoverPage() {
         'user_id': userId,
         'prompt': prompt,
         'nudity_strength': nudityStrength,
-        'uploaded_image': uploadedImage
+        'uploaded_image': uploadedImage,
+        'high_quality': highQuality
       })
 
       // Upload mask image to Supabase
@@ -255,7 +260,8 @@ export default function ClothesRemoverPage() {
             userId || '', 
             uploadedImage,
             maskImageUrl,
-            prompt
+            prompt,
+            highQuality
           )
           
           // Handle specific error cases that shouldn't be retried
@@ -296,7 +302,7 @@ export default function ClothesRemoverPage() {
 
       const checkStatus = async () => {
         try {
-          const result = await checkRemoveClothesStatus(jobId, userId || '', uploadedImage, prompt)
+          const result = await checkRemoveClothesStatus(jobId, userId || '', uploadedImage, prompt, highQuality)
           
           if (result.status === 'completed' && result.url) {
             const endTime = new Date()
@@ -305,8 +311,10 @@ export default function ClothesRemoverPage() {
             console.log(`Total generation time: ${totalTimeSeconds.toFixed(1)} seconds`)
             
             setCurrentImage(result.url)
+            setCurrentImageHQ(highQuality)
+
+            // add new image to the first position
             setHistoricalImages((prev) => [
-              ...prev, 
               { 
                 generation: result.url!,
                 upload_image: uploadedImage || '', 
@@ -314,8 +322,11 @@ export default function ClothesRemoverPage() {
                 comfyui_server: '', 
                 prompt: prompt,
                 mask_image: maskImage || '',
-                reference_images: []
-              }
+                reference_images: [],
+                generation_hq: '',
+                credits: highQuality ? 2 : 1
+              }, 
+              ...prev
             ])
             setIsGenerating(false)
             setProgress(0)
@@ -504,6 +515,37 @@ export default function ClothesRemoverPage() {
     </Dialog>
   )
 
+  const handleDownloadClick = (generation: UserGeneration) => {
+    if (generation.generation) {
+      if (generation.generation_hq) {
+        // If there's already an HQ version, open it directly
+        window.open(generation.generation_hq, '_blank')
+        posthog.capture('download_image', {
+          'image_url': generation.generation_hq,
+          'source': 'history',
+          'type': 'hq'
+        })
+      }
+      else if (generation.credits === 2) {
+        // For HQ generations (identified by credits=2), show the download dialog
+        setDownloadDialogImage(generation.generation)
+        setShowDownloadDialog(true)
+        posthog.capture('download_dialog_open', {
+          'image_url': generation.generation,
+          'source': 'history'
+        })
+      } else {
+        // For regular quality images, download directly
+        window.open(generation.generation, '_blank')
+        posthog.capture('download_image', {
+          'image_url': generation.generation,
+          'source': 'history',
+          'type': 'standard'
+        })
+      }
+    }
+  }
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -660,6 +702,19 @@ export default function ClothesRemoverPage() {
                                     onValueChange={(value) => setNudityStrength(value[0])}
                                   />
                                 </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id="high-quality"
+                                      checked={highQuality}
+                                      onChange={(e) => setHighQuality(e.target.checked)}
+                                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                    />
+                                    <Label htmlFor="high-quality">High quality generation (2x credits)</Label>
+                                  </div>
+                                  <p className="text-sm text-gray-500 ml-6">Higher resolution, more details, and better results</p>
+                                </div>
                               </div>
                             </AccordionContent>
                           </AccordionItem>
@@ -681,7 +736,7 @@ export default function ClothesRemoverPage() {
                             "Remove Clothes"
                           )}
                           <div className="flex items-center gap-0.5">
-                            <span className="text-yellow-500">1 x </span>
+                            <span className="text-yellow-500">{highQuality ? "2" : "1"} x </span>
                             <IconCoin className="h-4 w-4 text-yellow-500" />
                           </div>
                         </Button>
@@ -755,10 +810,16 @@ export default function ClothesRemoverPage() {
                                 className="rounded-full bg-white/80 hover:bg-white"
                                 onClick={() => {
                                   if (currentImage) {
-                                    posthog.capture('download_image', {
-                                      'image_url': currentImage
+                                    handleDownloadClick({
+                                      generation: currentImage,
+                                      upload_image: uploadedImage || '',
+                                      comfyui_prompt_id: '',
+                                      comfyui_server: '',
+                                      prompt: prompt,
+                                      reference_images: [],
+                                      generation_hq: '',
+                                      credits: currentImageHQ ? 2 : 1
                                     })
-                                    window.open(currentImage, '_blank')
                                   }
                                 }}
                                 disabled={isGenerating}
@@ -835,16 +896,32 @@ export default function ClothesRemoverPage() {
                               <p className="text-xs text-red-500 mt-1">Please try again</p>
                             </div>
                           ) : generation.generation ? (
-                            <Image
-                              src={generation.generation || "/placeholder.svg"}
-                              alt={`Historical Image ${index + 1}`}
-                              fill
-                              className="rounded-lg object-cover"
-                            />
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={generation.generation || "/placeholder.svg"}
+                                alt={`Historical Image ${index + 1}`}
+                                fill
+                                className="rounded-lg object-cover"
+                              />
+                              <div className="absolute top-2 right-2">
+                                <Button
+                                  variant="secondary"
+                                  size="icon"
+                                  className="rounded-full bg-white/80 hover:bg-white"
+                                  onClick={() => handleDownloadClick(generation)}
+                                >
+                                  <IconDownload className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
                           ) : generation.comfyui_prompt_id ? (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-muted rounded-lg animate-pulse">
                               <IconLoader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-                              <p className="text-sm font-medium text-muted-foreground">Processing...</p>
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {isGenerating && generationStatus === 'pending' ? 
+                                  "In Queue..." : 
+                                  "Processing..."}
+                              </p>
                               <p className="text-xs text-muted-foreground mt-1">This may take a moment</p>
                             </div>
                           ) : (
@@ -909,6 +986,12 @@ export default function ClothesRemoverPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <DownloadDialog
+          isOpen={showDownloadDialog}
+          onClose={() => setShowDownloadDialog(false)}
+          imageUrl={downloadDialogImage || undefined}
+        />
       </div>
     </SidebarProvider>
   )

@@ -110,16 +110,18 @@ export type UserGeneration = {
   comfyui_server: string;
   prompt: string;
   reference_images: string[];
+  generation_hq: string;
+  credits: number;
 }
 
 export const getUserGenerations = async (user_id: string, feature: string, limit: number = 20): Promise<UserGeneration[]> => {
   const { data, error } = await supabaseClient
     .from('happyface_generations')
-    .select('generation, upload_image, comfyui_prompt_id, comfyui_server, prompt, reference_images')
+    .select('generation, upload_image, comfyui_prompt_id, comfyui_server, prompt, reference_images, generation_hq, credits')
     .eq('user_id', user_id)
     .eq('feature', feature)
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    .limit(limit)
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error("Error fetching user generations:", error);
@@ -139,6 +141,8 @@ export const getUserGenerations = async (user_id: string, feature: string, limit
     comfyui_prompt_id: generation.comfyui_prompt_id,
     comfyui_server: generation.comfyui_server,
     prompt: generation.prompt,
-    reference_images: generation.reference_images || []
+    reference_images: generation.reference_images || [],
+    generation_hq: generation.generation_hq,
+    credits: generation.credits
   }));
 };

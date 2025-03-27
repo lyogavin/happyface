@@ -21,7 +21,7 @@ import { Progress } from "@/components/ui/progress"
 import { getUserGenerations } from "@/lib/user-utils"
 import pRetry, { AbortError } from 'p-retry'
 import { submitNsfwGenerationJob, checkNsfwGenerationStatus } from "@/lib/nsfw-generator"
-import { IconCoin, IconLoader2, IconChevronDown } from '@tabler/icons-react'
+import { IconCoin, IconLoader2, IconChevronDown, IconDownload } from '@tabler/icons-react'
 import { Checkbox } from "@/components/ui/checkbox"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -46,6 +46,9 @@ export default function Home() {
   const [optimizeForSm, setOptimizeForSm] = useState(false)
   const [outputSize, setOutputSize] = useState("1152x896")
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
+  const [highQuality, setHighQuality] = useState(false)
+  const [currentImageHQ, setCurrentImageHQ] = useState(false)
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
   
   const handleImageUpload = (images: string[]) => {
     setUploadedImages(images)
@@ -59,6 +62,8 @@ export default function Home() {
           setIsLoading(true)
           const isLocal = window.location.hostname === 'localhost';
           const generations = await getUserGenerations(user.id, "nsfw-generator", isLocal ? 5 : 20);
+
+          console.log('fetched historical generations', generations)
           
           // Include both completed generations (with valid URLs) AND in-progress generations (with comfyui_prompt_id)
           // Only filter out invalid ones without a prompt ID and without a valid URL
@@ -116,6 +121,7 @@ export default function Home() {
         
         try {
           // Call checkNsfwGenerationStatus to get the result
+          // Use default values since we don't have access to the original parameters
           const status = await checkNsfwGenerationStatus(
             gen.comfyui_prompt_id,
             userId,
@@ -170,6 +176,18 @@ export default function Home() {
     }
   };
 
+  // Add a function to extract the dimensions without the HQ marker
+  const getActualDimensions = (size: string) => {
+    // Strip the "-HQ" suffix if present
+    const cleanSize = size.replace("-HQ", "");
+    return cleanSize;
+  };
+
+  // Add a function to check if a size selection is high quality
+  const isHighQualitySize = (size: string) => {
+    return size.includes("-HQ");
+  };
+
   const handleGenerate = async () => {
     if (!uploadedImages.length && prompt.trim() === "") {
       toast({
@@ -194,17 +212,23 @@ export default function Home() {
         throw new Error("User not authenticated")
       }
 
+      // Use the resolution-based high quality flag or the checkbox, whichever is true
+      const isHQSelected = isHighQualitySize(outputSize);
+      
       posthog.capture('nsfw_generation_started', {
         'user_id': userId,
         'prompt': prompt,
-        'reference_images': uploadedImages
+        'reference_images': uploadedImages,
+        'optimize_for_sm': optimizeForSm,
+        'output_size': getActualDimensions(outputSize), // Clean dimensions without HQ marker
+        'high_quality': isHQSelected
       })
 
       // Use p-retry for submitNsfwGenerationJob
       const jobId = await pRetry(
         async () => {
           // Parse width and height from the outputSize selection
-          const [width, height] = outputSize.split('x').map(Number);
+          const [width, height] = getActualDimensions(outputSize).split('x').map(Number);
           
           const result = await submitNsfwGenerationJob(
             userId, 
@@ -212,7 +236,8 @@ export default function Home() {
             prompt,
             optimizeForSm,
             width,
-            height
+            height,
+            isHQSelected // Use combined high quality flag
           )
           
           // Handle specific error cases that shouldn't be retried
@@ -254,7 +279,9 @@ export default function Home() {
       const checkStatus = async () => {
         try {
           // Parse width and height from the outputSize selection
-          const [width, height] = outputSize.split('x').map(Number);
+          const [width, height] = getActualDimensions(outputSize).split('x').map(Number);
+
+          console.log('chekcking status', isHQSelected)
           
           const result = await checkNsfwGenerationStatus(
             jobId, 
@@ -263,7 +290,8 @@ export default function Home() {
             prompt,
             optimizeForSm,
             width,
-            height
+            height,
+            isHQSelected
           )
           
           if (result.status === 'completed' && result.url) {
@@ -273,16 +301,23 @@ export default function Home() {
             console.log(`Total generation time: ${totalTimeSeconds.toFixed(1)} seconds`)
             
             setCurrentImage(result.url)
+            setCurrentImageHQ(isHQSelected)
+            console.log('currentImageHQ', currentImageHQ) 
+            console.log('isHQSelected', isHQSelected)
+
+            // add new image to the first position
             setHistoricalImages((prev) => [
-              ...prev, 
               { 
                 generation: result.url!,
                 upload_image: '', 
                 comfyui_prompt_id: jobId, 
                 comfyui_server: '', 
                 prompt: prompt,
-                reference_images: uploadedImages || []
-              }
+                reference_images: uploadedImages || [],
+                generation_hq: '',
+                credits: isHQSelected ? 2 : 1
+              }, 
+              ...prev
             ])
             setIsGenerating(false)
             setProgress(0)
@@ -382,6 +417,36 @@ export default function Home() {
     </Dialog>
   )
   
+  const handleDownloadClick = (generation: UserGeneration) => {
+    if (generation.generation) {
+      if (generation.generation_hq) {
+        // If there's already an HQ version, open it directly
+        window.open(generation.generation_hq, '_blank')
+        posthog.capture('download_image', {
+          'image_url': generation.generation_hq,
+          'source': 'history',
+          'type': 'hq'
+        })
+      }
+      else if (generation.credits === 2) {
+        // For HQ generations (identified by credits=2), show the download dialog
+        setShowDownloadDialog(true)
+        posthog.capture('download_dialog_open', {
+          'image_url': generation.generation,
+          'source': 'history'
+        })
+      } else {
+        // For regular quality images, download directly
+        window.open(generation.generation, '_blank')
+        posthog.capture('download_image', {
+          'image_url': generation.generation,
+          'source': 'history',
+          'type': 'standard'
+        })
+      }
+    }
+  }
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
@@ -482,6 +547,30 @@ export default function Home() {
                               </div>
                               
                               <div className="space-y-2">
+                                <div className="flex items-start space-x-2">
+                                  <Checkbox 
+                                    id="high-quality" 
+                                    checked={highQuality}
+                                    onCheckedChange={(checked: boolean | "indeterminate") => 
+                                      setHighQuality(checked === true)
+                                    }
+                                    className="mt-0.5 h-4 w-4"
+                                  />
+                                  <div className="grid gap-1">
+                                    <label 
+                                      htmlFor="high-quality" 
+                                      className="text-sm font-medium leading-none cursor-pointer"
+                                    >
+                                      High Quality Generation (2x credits)
+                                    </label>
+                                    <p className="text-xs text-muted-foreground">
+                                      Enhanced detail, better quality, and more photorealistic results
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
                                 <div className="grid gap-0.5">
                                   <label 
                                     htmlFor="output-size" 
@@ -490,7 +579,7 @@ export default function Home() {
                                     Output Size
                                   </label>
                                   <p className="text-xs text-muted-foreground mb-1">
-                                    Choose the dimensions of your generated image
+                                    Choose the dimensions of your generated image. Larger sizes provide enhanced quality at 2x the credit cost.
                                   </p>
                                 </div>
                                 <Select 
@@ -501,13 +590,23 @@ export default function Home() {
                                     <SelectValue placeholder="Select output size" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="1152x896">Default (1152x896)</SelectItem>
-                                    <SelectItem value="1024x1024">1024x1024 - Square</SelectItem>
-                                    <SelectItem value="768x1024">768x1024 - Portrait</SelectItem>
-                                    <SelectItem value="576x1024">576x1024 - Tall Portrait</SelectItem>
-                                    <SelectItem value="1024x768">1024x768 - Landscape</SelectItem>
-                                    <SelectItem value="1024x576">1024x576 - Wide Landscape</SelectItem>
-                                    <SelectItem value="512x512">512x512 - Small Square</SelectItem>
+                                    {/* Standard Resolutions */}
+                                    <SelectItem value="1152x896">1152x896</SelectItem>
+                                    <SelectItem value="1024x1024">1024x1024</SelectItem>
+                                    <SelectItem value="768x1024">768x1024</SelectItem>
+                                    <SelectItem value="576x1024">576x1024</SelectItem>
+                                    <SelectItem value="1024x768">1024x768</SelectItem>
+                                    <SelectItem value="1024x576">1024x576</SelectItem>
+                                    <SelectItem value="512x512">512x512</SelectItem>
+                                    
+                                    {/* High Quality Resolutions */}
+                                    <SelectItem value="1152x896-HQ">4608x3584 (2x credits)</SelectItem>
+                                    <SelectItem value="1024x1024-HQ">4096x4096 (2x credits)</SelectItem>
+                                    <SelectItem value="768x1024-HQ">3072x4096 (2x credits)</SelectItem>
+                                    <SelectItem value="576x1024-HQ">2304x4096 (2x credits)</SelectItem>
+                                    <SelectItem value="1024x768-HQ">4096x3072 (2x credits)</SelectItem>
+                                    <SelectItem value="1024x576-HQ">4096x2304 (2x credits)</SelectItem>
+                                    <SelectItem value="512x512-HQ">2048x2048 (2x credits)</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -533,7 +632,7 @@ export default function Home() {
                         <>
                           Generate NSFW Image
                           <div className="flex items-center gap-0.5 ml-2">
-                            <span className="text-yellow-500">1 x </span>
+                            <span className="text-yellow-500">{isHighQualitySize(outputSize) || highQuality ? "2" : "1"} x </span>
                             <IconCoin className="h-4 w-4 text-yellow-500" />
                           </div>
                         </>
@@ -567,6 +666,7 @@ export default function Home() {
                     currentImage={currentImage} 
                     isGenerating={isGenerating} 
                     generationStatus={generationStatus} 
+                    currentImageHQ={currentImageHQ}
                   />
                 </div>
               </div>

@@ -40,11 +40,13 @@ import { EditorFooter } from "@/app/components/EditorFooter"
 import { validateImage } from "@/lib/image-checker"
 import { AlertCircle as LucideAlertCircle } from "lucide-react"
 import pRetry, { AbortError } from 'p-retry'
+import DownloadDialog from "@/components/download-dialog"
 
 export default function EditorPage() {
   const { user, isLoaded } = useUser()
   const [prompt, setPrompt] = useState("")
   const [currentImage, setCurrentImage] = useState<string | null>(null)
+  const [currentImageHQ, setCurrentImageHQ] = useState<boolean>(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [historicalImages, setHistoricalImages] = useState<UserGeneration[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -59,7 +61,15 @@ export default function EditorPage() {
   const [showErrorDialog, setShowErrorDialog] = useState(false)
   const [onlyModifyFace, setOnlyModifyFace] = useState(true)
   const [facePlusHair, setFacePlusHair] = useState(false)
+  const [highQuality, setHighQuality] = useState(false)
   const [expectedTotalTime, setExpectedTotalTime] = useState(88)
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [downloadDialogImage, setDownloadDialogImage] = useState<string | null>(null)
+
+  useEffect(() => {
+    console.log('currentImageHQ', currentImageHQ)
+    console.log('highQuality', highQuality)
+  }, [currentImageHQ, highQuality])
 
 
   // Add useEffect to load historical generations
@@ -76,6 +86,8 @@ export default function EditorPage() {
           // Set the historical images first
           setHistoricalImages(generations)
           setIsLoading(false)
+
+          console.log('historical images', generations)
           
           // Filter out incomplete generations that need checking
           const incompleteGenerations = generations.filter(
@@ -194,7 +206,9 @@ export default function EditorPage() {
         'cum_strength': cumStrength,
         'orgasm_strength': orgasmStrength,
         'uploaded_image': uploadedImage,
-        'only_modify_face': onlyModifyFace
+        'only_modify_face': onlyModifyFace,
+        'face_plus_hair': facePlusHair,
+        'high_quality': highQuality
       })
 
       // Use p-retry for submitHappyFaceJob
@@ -211,7 +225,8 @@ export default function EditorPage() {
             cumStrength,
             orgasmStrength,
             onlyModifyFace,
-            facePlusHair
+            facePlusHair,
+            highQuality
           )
           
           
@@ -255,7 +270,8 @@ export default function EditorPage() {
 
       const checkStatus = async () => {
         try {
-          const result = await checkHappyFaceStatusAdvanced(jobId, userId || '', uploadedImage, prompt);
+          const result = await checkHappyFaceStatusAdvanced(jobId, userId || '', uploadedImage, prompt, highQuality);
+          console.log('checking status', result)
           
           if (result.status === 'completed' && result.url) {
             const endTime = new Date()
@@ -264,15 +280,24 @@ export default function EditorPage() {
             console.log(`Total generation time: ${totalTimeSeconds.toFixed(1)} seconds`)
             
             setCurrentImage(result.url)
-            setHistoricalImages((prev) => [...prev, 
+            setCurrentImageHQ(highQuality)
+
+            console.log('result.url', result.url)
+            console.log('highQuality', highQuality)
+
+            // add new image to the first position
+            setHistoricalImages((prev) => [
               { 
                 generation: result.url!,
                 upload_image: uploadedImage || '', 
                 comfyui_prompt_id: jobId, 
                 comfyui_server: '', 
-                prompt: prompt,
-                reference_images: [] 
-              }
+                prompt: prompt, 
+                reference_images: [],
+                generation_hq: '',
+                credits: highQuality ? 2 : 1
+              }, 
+              ...prev
             ])
             setIsGenerating(false)
             setProgress(0)
@@ -466,6 +491,11 @@ export default function EditorPage() {
           <div className="flex-1 px-0 md:px-8 py-8 overflow-auto">
             <div className="container mx-auto max-w-[1600px]">
               <CreditPurchaseDialog />
+              <DownloadDialog 
+                isOpen={showDownloadDialog}
+                onClose={() => setShowDownloadDialog(false)}
+                imageUrl={downloadDialogImage || ''}
+              />
               
               <h1 className="text-3xl font-bold mb-8 text-center">Cum Face AI Editor</h1>
 
@@ -544,34 +574,47 @@ export default function EditorPage() {
                                     onValueChange={(value) => setOrgasmStrength(value[0])}
                                   />
                                 </div>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                      <input
-                                        type="checkbox"
-                                        id="only-modify-face"
-                                        checked={onlyModifyFace}
-                                        onChange={(e) => setOnlyModifyFace(e.target.checked)}
-                                        className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled={!uploadedImage}
-                                      />
-                                      <Label htmlFor="only-modify-face">Only modify face</Label>
-                                      
-                                      {onlyModifyFace && (
-                                        <div className="ml-4">
-                                          <select
-                                            id="face-modification-type"
-                                            className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                                            value={facePlusHair ? "face-hair" : "face-only"}
-                                            onChange={(e) => setFacePlusHair(e.target.value === "face-hair")}
-                                            disabled={!onlyModifyFace}
-                                          >
-                                            <option value="face-only">Face only</option>
-                                            <option value="face-hair">Face + hair</option>
-                                          </select>
-                                        </div>
-                                      )}
-                                    </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id="only-modify-face"
+                                      checked={onlyModifyFace}
+                                      onChange={(e) => setOnlyModifyFace(e.target.checked)}
+                                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      disabled={!uploadedImage}
+                                    />
+                                    <Label htmlFor="only-modify-face">Only modify face</Label>
+                                    
+                                    {onlyModifyFace && (
+                                      <div className="ml-4">
+                                        <select
+                                          id="face-modification-type"
+                                          className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                          value={facePlusHair ? "face-hair" : "face-only"}
+                                          onChange={(e) => setFacePlusHair(e.target.value === "face-hair")}
+                                          disabled={!onlyModifyFace}
+                                        >
+                                          <option value="face-only">Face only</option>
+                                          <option value="face-hair">Face + hair</option>
+                                        </select>
+                                      </div>
+                                    )}
                                   </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id="high-quality"
+                                      checked={highQuality}
+                                      onChange={(e) => setHighQuality(e.target.checked)}
+                                      className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                    />
+                                    <Label htmlFor="high-quality">High quality generation (2x credits)</Label>
+                                  </div>
+                                  <p className="text-sm text-gray-500 ml-6">Higher resolution, more details, and better consistency</p>
+                                </div>
                               </div>
                             </AccordionContent>
                           </AccordionItem>
@@ -593,7 +636,7 @@ export default function EditorPage() {
                             "Generate Cum Face"
                           )}
                           <div className="flex items-center gap-0.5">
-                            <span className="text-yellow-500">1 x </span>
+                            <span className="text-yellow-500">{highQuality ? "2" : "1"} x </span>
                             <IconCoin className="h-4 w-4 text-yellow-500" />
                           </div>
                         </Button>
@@ -621,11 +664,18 @@ export default function EditorPage() {
                               size="icon"
                               className="rounded-full bg-white/80 hover:bg-white"
                               onClick={() => {
-                                if (currentImage) {
+                                if (currentImage && currentImageHQ) {
+                                  setDownloadDialogImage(currentImage)
+                                  setShowDownloadDialog(true)
+                                  posthog.capture('download_dialog_open', {
+                                    'image_url': currentImage
+                                  })
+                                } else if (currentImage) {
+                                  // directly download the image
+                                  window.open(currentImage, '_blank')
                                   posthog.capture('download_image', {
                                     'image_url': currentImage
                                   })
-                                  window.open(currentImage, '_blank')
                                 }
                               }}
                               disabled={isGenerating}
@@ -700,12 +750,51 @@ export default function EditorPage() {
                               <p className="text-xs text-red-500 mt-1">Please try again</p>
                             </div>
                           ) : generation.generation ? (
-                            <Image
-                              src={generation.generation || "/placeholder.svg"}
-                              alt={`Historical Image ${index + 1}`}
-                              fill
-                              className="rounded-lg object-cover"
-                            />
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={generation.generation || "/placeholder.svg"}
+                                alt={`Historical Image ${index + 1}`}
+                                fill
+                                className="rounded-lg object-cover"
+                              />
+                              <div className="absolute top-2 right-2">
+                                <Button
+                                  variant="secondary"
+                                  size="icon"
+                                  className="rounded-full bg-white/80 hover:bg-white"
+                                  onClick={() => {
+                                    if (generation.generation) {
+                                      if (generation.generation_hq) {
+                                        // For regular images, directly download
+                                        window.open(generation.generation_hq, '_blank')
+                                        posthog.capture('download_image', {
+                                          'image_url': generation.generation_hq,
+                                          'source': 'history'
+                                        })
+                                      }
+                                      else if (generation.credits === 2) {
+                                        // For images with HQ version available, open the download dialog
+                                        setDownloadDialogImage(generation.generation)
+                                        setShowDownloadDialog(true)
+                                        posthog.capture('download_dialog_open', {
+                                          'image_url': generation.generation,
+                                          'source': 'history'
+                                        })
+                                      } else {
+                                        // For regular images, directly download
+                                        window.open(generation.generation, '_blank')
+                                        posthog.capture('download_image', {
+                                          'image_url': generation.generation,
+                                          'source': 'history'
+                                        })
+                                      }
+                                    }
+                                  }}
+                                >
+                                  <IconDownload className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
                           ) : generation.comfyui_prompt_id ? (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-muted rounded-lg animate-pulse">
                               <IconLoader2 className="h-8 w-8 animate-spin text-primary mb-2" />

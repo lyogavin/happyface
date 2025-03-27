@@ -27,13 +27,16 @@ export async function submitHappyFaceJobAdvanced(
   cumStrength?: number,
   orgasmStrength?: number, 
   onlyModifyFace?: boolean,
-  facePlusHair?: boolean
+  facePlusHair?: boolean,
+  highQuality?: boolean
 ): Promise<string> {
-  console.log('submitHappyFaceJob', userId, sourceImageUrl, prompt, cumStrength, orgasmStrength, onlyModifyFace, facePlusHair);
+  console.log('submitHappyFaceJob', userId, sourceImageUrl, prompt, cumStrength, orgasmStrength, onlyModifyFace, facePlusHair, highQuality);
 
   // Check user subscription status first
   const subscription = await getUserSubscriptionStatus(userId);
-  if (!subscription || subscription.credits < 1) {
+  // If high quality is enabled, check if user has at least 2 credits
+  const requiredCredits = highQuality ? 2 : 1;
+  if (!subscription || subscription.credits < requiredCredits) {
     return 'Insufficient credits';
   }
 
@@ -205,7 +208,7 @@ export async function submitHappyFaceJobAdvanced(
   throw new Error('Unexpected error in job submission');
 }
 
-export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string, sourceImageUrl: string | null, prompt: string): Promise<ComfyUIProgress> {
+export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string, sourceImageUrl: string | null, prompt: string, highQuality: boolean = false): Promise<ComfyUIProgress> {
   try {
     // Check queue status first
     const queueResponse = await fetch(`${COMFY_API_HOST}/queue`, {
@@ -330,14 +333,27 @@ export async function checkHappyFaceStatusAdvanced(jobId: string, userId: string
         try {
           // log handle happyface generation time
           const handleHappyfaceStartTime = new Date();
+          console.log('calling handleHappyfaceStartTime highQuality', highQuality)
           // call supabase rpc handle_happyface_generation to save result and decrease credits
-          const { error: rpcError } = await supabase.rpc('handle_happyface_generation', {
+          const { error: rpcError } = await supabase.rpc('handle_happyface_generation_with_credits', {
             p_user_id: userId,
             p_source_image_url: sourceImageUrl,
             p_prompt: prompt,
             p_result_image_url: imageUrl,
             p_comfyui_prompt_id: jobId,
+            p_credits: highQuality ? 2 : 1,
+            p_result_image_hq_url: '',
           });
+
+          console.log('called rpc', {
+            p_user_id: userId,
+            p_source_image_url: sourceImageUrl,
+            p_prompt: prompt,
+            p_result_image_url: imageUrl,
+            p_comfyui_prompt_id: jobId,
+            p_credits: highQuality ? 2 : 1,
+            p_result_image_hq_url: '',
+          })
           const handleHappyfaceEndTime = new Date();
           const handleHappyfaceTime = handleHappyfaceEndTime.getTime() - handleHappyfaceStartTime.getTime();
           console.log('Handle happyface time', handleHappyfaceTime);
