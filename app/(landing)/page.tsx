@@ -431,6 +431,14 @@ export default function LandingPage() {
                     >
                       Ultimate Guide to Creating Cum Faces
                     </a>
+                    <a 
+                      href="https://lyo-gavin.systeme.io/cum-face-ai" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-600"
+                    >
+                      Intro of Cum Face AI
+                    </a>
                     {/* Add more dropdown links here as needed */}
                   </div>
                 </div>
