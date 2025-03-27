@@ -86,7 +86,7 @@ export async function submitRemoveClothesJob(
         comfyui_prompt_id: data.prompt_id,
         comfyui_server: COMFY_API_HOST,
         feature: 'clothes-remover',
-        high_quality: highQuality || false
+        credits: highQuality ? 2 : 1
       });
       
       if (dbError) {

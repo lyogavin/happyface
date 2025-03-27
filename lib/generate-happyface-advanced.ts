@@ -177,6 +177,7 @@ export async function submitHappyFaceJobAdvanced(
         comfyui_prompt_id: data.prompt_id,
         comfyui_server: COMFY_API_HOST,
         feature: 'cum-face',
+        credits: highQuality ? 2 : 1
       });
       if (dbError) {
         console.error('Failed to insert into happyface_generations', dbError);
