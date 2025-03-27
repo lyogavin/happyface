@@ -423,6 +423,14 @@ export default function LandingPage() {
                     >
                       How to Generate Cum Face
                     </a>
+                    <a 
+                      href="https://cumfaceai.web.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-600"
+                    >
+                      Ultimate Guide to Creating Cum Faces
+                    </a>
                     {/* Add more dropdown links here as needed */}
                   </div>
                 </div>
