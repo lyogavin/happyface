@@ -45,7 +45,7 @@ export default function Home() {
   const [showCreditDialog, setShowCreditDialog] = useState(false)
   const [optimizeForSm, setOptimizeForSm] = useState(false)
   const [outputSize, setOutputSize] = useState("1152x896")
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false)
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(true)
   const [highQuality, setHighQuality] = useState(false)
   const [currentImageHQ, setCurrentImageHQ] = useState(false)
   const [showDownloadDialog, setShowDownloadDialog] = useState(false)
@@ -545,30 +545,7 @@ export default function Home() {
                                   </div>
                                 </div>
                               </div>
-                              
-                              <div className="space-y-2">
-                                <div className="flex items-start space-x-2">
-                                  <Checkbox 
-                                    id="high-quality" 
-                                    checked={highQuality}
-                                    onCheckedChange={(checked: boolean | "indeterminate") => 
-                                      setHighQuality(checked === true)
-                                    }
-                                    className="mt-0.5 h-4 w-4"
-                                  />
-                                  <div className="grid gap-1">
-                                    <label 
-                                      htmlFor="high-quality" 
-                                      className="text-sm font-medium leading-none cursor-pointer"
-                                    >
-                                      High Quality Generation (2x credits)
-                                    </label>
-                                    <p className="text-xs text-muted-foreground">
-                                      Enhanced detail, better quality, and more photorealistic results
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                            
                               
                               <div className="space-y-2">
                                 <div className="grid gap-0.5">

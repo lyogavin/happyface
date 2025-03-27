@@ -686,7 +686,7 @@ export default function ClothesRemoverPage() {
                           />
                         </div>
 
-                        <Accordion type="single" collapsible className="w-full">
+                        <Accordion type="single" collapsible className="w-full" defaultValue="settings">
                           <AccordionItem value="settings">
                             <AccordionTrigger>Advanced Settings</AccordionTrigger>
                             <AccordionContent>
