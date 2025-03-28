@@ -501,6 +501,14 @@ export default function LandingPage() {
                       Intro of Cum Face AI
                     </a>
                     <a 
+                      href="https://github.com/best-nsfw-image-generator/awesome-nsfw-generators" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-600"
+                    >
+                      Awesome NSFW Generator
+                    </a>
+                    <a 
                       href="https://community.fabric.microsoft.com/t5/user/viewprofilepage/user-id/1247640" 
                       target="_blank" 
                       rel="noopener noreferrer" 
