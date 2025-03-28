@@ -7,7 +7,7 @@ import type React from "react" // Import React
 import { PostHogProvider } from './providers'
 const inter = Inter({ subsets: ["latin"] })
 import { getBootstrapData } from '../lib/getBootstrapData'
-
+import { Analytics } from "@vercel/analytics/react"
 // Add metadata export
 export const metadata = {
   metadataBase: new URL("https://www.cumfaceai.com"),
@@ -28,6 +28,7 @@ export default async function RootLayout({
         <body className={inter.className}>
           <PostHogProvider bootstrapData={bootstrapData}>
             {children}
+            <Analytics />
           </PostHogProvider>
         </body>
       </html>
