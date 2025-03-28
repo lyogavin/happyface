@@ -27,5 +27,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: 'https://www.cumfaceai.com/ai-nsfw-api',
       lastModified: new Date(),
     },
+    {
+      url: 'https://www.cumfaceai.com/blog/top-nsfw-ai-image-generators-2025',
+      lastModified: new Date(),
+    },
   ]
 }
