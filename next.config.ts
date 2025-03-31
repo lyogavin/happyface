@@ -38,6 +38,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost:3000',
+      },
     ],
   },
 };

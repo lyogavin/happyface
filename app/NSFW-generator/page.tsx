@@ -50,6 +50,24 @@ export default function Home() {
   const [currentImageHQ, setCurrentImageHQ] = useState(false)
   const [showDownloadDialog, setShowDownloadDialog] = useState(false)
   
+  // Check for prefill_prompt parameter on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const prefillPrompt = urlParams.get('prefill_prompt');
+      
+      if (prefillPrompt) {
+        // Set the prompt from URL parameter
+        setPrompt(decodeURIComponent(prefillPrompt));
+        
+        // Remove the parameter from URL without reloading the page
+        urlParams.delete('prefill_prompt');
+        const newUrl = window.location.pathname + (urlParams.toString() ? `?${urlParams.toString()}` : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, []);
+
   const handleImageUpload = (images: string[]) => {
     setUploadedImages(images)
   }

@@ -5,6 +5,7 @@ import { IconCoin, IconSticker, IconDragDrop, IconWand, IconInfinity, IconPhoto,
 import PricingSection from "@/components/pricing-section"
 import { GetCreditsButton } from "@/components/get-credits-button"
 import { Blog } from "@/components/blog/blog"
+import landingPageData from '@/app/tools/[generator-title]/enhanced_results_with_prompts_nsfw_image_gend.json'
 
 export default function LandingPage() {
   return (
@@ -466,6 +467,28 @@ export default function LandingPage() {
               </div>
             </div>
             <nav className="flex flex-wrap justify-center md:justify-end gap-4">
+              {/* AI Tools Dropdown */}
+              <div className="relative group">
+                <button className="text-sm hover:text-gray-300 flex items-center gap-1">
+                  AI Tools
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                <div className="absolute bottom-full mb-2 right-0 bg-gray-700 rounded-md shadow-lg w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 max-h-80 overflow-y-auto">
+                  <div className="py-1">
+                    {landingPageData.map((tool, index) => (
+                      <Link 
+                        key={index}
+                        href={`/tools/${tool.title.toLowerCase().replace(/ /g, '-').replace(/:/g, '-')}`}
+                        className="block px-4 py-2 text-sm hover:bg-gray-600"
+                      >
+                        {tool.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
               {/* Other Info Dropdown */}
               <div className="relative group">
                 <button className="text-sm hover:text-gray-300 flex items-center gap-1">
