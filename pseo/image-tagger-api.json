@@ -1,0 +1,30 @@
+{
+  "1": {
+    "inputs": {
+      "model": "wd-v1-4-moat-tagger-v2",
+      "threshold": 0.35,
+      "character_threshold": 0.85,
+      "replace_underscore": false,
+      "trailing_comma": false,
+      "exclude_tags": "",
+      "tags": "1girl, solo, long_hair, breasts, looking_at_viewer, smile, large_breasts, brown_hair, thighhighs, navel, cleavage, brown_eyes, underwear, panties, artist_name, indoors, bra, blurry, lips, black_panties, window, watermark, underwear_only, lingerie, curtains, black_bra, web_address, garter_belt, realistic",
+      "image": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "WD14Tagger|pysssss",
+    "_meta": {
+      "title": "WD14 Tagger 🐍"
+    }
+  },
+  "3": {
+    "inputs": {
+      "url_or_path": "https://scontent-dfw5-1.cdninstagram.com/v/t39.30808-6/479057926_613417618287297_1751938931122809423_n.jpg?stp=dst-jpg_e35_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQuaW1hZ2VfdXJsZ2VuLjE3MTF4MjA0OC5zZHIuZjMwODA4LmRlZmF1bHRfaW1hZ2UifQ&_nc_ht=scontent-dfw5-1.cdninstagram.com&_nc_cat=109&_nc_oc=Q6cZ2QF9dRTzTGD_lefaDT1Mqz4lR6Bu7JW-ThSDeXBH81KJ2HA-jn3uF9vRGtEmY6LFDMQ&_nc_ohc=xS_ajUFYFFEQ7kNvgHi9h5Y&_nc_gid=d81vSigMucAMuP8ftgq4Ug&edm=APoiHPcAAAAA&ccb=7-5&ig_cache_key=MzI1ODYxOTkwMDcwNjYwNDM3MA%3D%3D.3-ccb7-5&oh=00_AYFJQ2QxAh3r7tZqGbihRFVRyOQKJ5ySVlh198uIu1aJrA&oe=67F0B954&_nc_sid=22de04"
+    },
+    "class_type": "LoadImageFromUrlOrPath",
+    "_meta": {
+      "title": "LoadImageFromUrlOrPath"
+    }
+  }
+}
