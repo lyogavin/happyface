@@ -502,7 +502,6 @@ export default function LandingPage() {
                     <a 
                       href="https://how-to-generate-cum-face.vercel.app/" 
                       target="_blank" 
-                      rel="noopener noreferrer" 
                       className="block px-4 py-2 text-sm hover:bg-gray-600"
                     >
                       How to Generate Cum Face
@@ -510,7 +509,6 @@ export default function LandingPage() {
                     <a 
                       href="https://cumfaceai.web.app/" 
                       target="_blank" 
-                      rel="noopener noreferrer" 
                       className="block px-4 py-2 text-sm hover:bg-gray-600"
                     >
                       Ultimate Guide to Creating Cum Faces
@@ -518,7 +516,6 @@ export default function LandingPage() {
                     <a 
                       href="https://lyo-gavin.systeme.io/cum-face-ai" 
                       target="_blank" 
-                      rel="noopener noreferrer" 
                       className="block px-4 py-2 text-sm hover:bg-gray-600"
                     >
                       Intro of Cum Face AI
@@ -526,7 +523,6 @@ export default function LandingPage() {
                     <a 
                       href="https://github.com/best-nsfw-image-generator/awesome-nsfw-generators" 
                       target="_blank" 
-                      rel="noopener noreferrer" 
                       className="block px-4 py-2 text-sm hover:bg-gray-600"
                     >
                       Awesome NSFW Generator
@@ -534,10 +530,16 @@ export default function LandingPage() {
                     <a 
                       href="https://community.fabric.microsoft.com/t5/user/viewprofilepage/user-id/1247640" 
                       target="_blank" 
-                      rel="noopener noreferrer" 
                       className="block px-4 py-2 text-sm hover:bg-gray-600"
                     >
                       Fabric Community
+                    </a>
+                    <a 
+                      href="https://dang.ai" 
+                      target="_blank" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-600"
+                    >
+                      Dang AI
                     </a>
                     {/* Add more dropdown links here as needed */}
                   </div>
