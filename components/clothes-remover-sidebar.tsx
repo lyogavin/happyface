@@ -13,7 +13,8 @@ import {
   IconHeart,
   IconStar,
   IconCrown,
-  IconLock
+  IconLock,
+  IconCoin
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar"
@@ -106,7 +107,7 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
               </Link>
             </p>
         </div>
-        <SidebarContent className="px-2">
+        <SidebarContent className="px-2 mt-4">
           {sidebarItems.map((item) => (
             <Link 
               key={item.id}
@@ -176,6 +177,17 @@ export function ClothesRemoverSidebar({ className, currentFeature }: SidebarProp
             </Link>
           </Button>
         </div>
+      </div>
+
+      {/* Footer on the bottom of the sidebar*/}
+      <Separator />
+      <div className="py-4 px-4">
+        <a href="https://happy-face-ai.trackdesk.com/sign-up" target="_blank" className="flex items-center gap-2 hover:underline">
+          <IconCoin className="h-4 w-4" />
+          <p className="text-base font-semibold tracking-tight">
+            Affiliate
+          </p>
+        </a>
       </div>
       
       {/* Coming Soon Dialog */}

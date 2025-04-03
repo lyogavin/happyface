@@ -6,9 +6,11 @@ import PricingSection from "@/components/pricing-section"
 import { GetCreditsButton } from "@/components/get-credits-button"
 import { Blog } from "@/components/blog/blog"
 import landingPageData from '@/app/tools/[generator-title]/enhanced_results_with_prompts_nsfw_image_gend.json'
+import TrackDeskTrackClick from "@/components/track-desk-track-click"
 
 export default function LandingPage() {
   return (
+    <>
     <div className="flex flex-col min-h-[100dvh]">
       <header className="w-full py-6 px-4 sm:px-6 lg:px-8 bg-white border-b">
         <div className="container mx-auto flex justify-between items-center">
@@ -549,6 +551,9 @@ export default function LandingPage() {
                     >
                       RightAI Tools Diresctory
                     </a>
+                    <a href="https://happy-face-ai.trackdesk.com/sign-up">
+                      Affiliate
+                    </a>
                     {/* Add more dropdown links here as needed */}
                   </div>
                 </div>
@@ -570,6 +575,8 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    <TrackDeskTrackClick />
+    </>
   )
 }
 

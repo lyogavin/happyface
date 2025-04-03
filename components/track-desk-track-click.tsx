@@ -17,6 +17,17 @@ export default function TrackDeskTrackClick() {
         (function(t,d,k){(t[k]=t[k]||[]).push(d);t[d]=t[d]||t[k].f||function(...args){(t[d].q=t[d].q||[]).push(args)}})(window,"trackdesk","TrackdeskObject"); 
 
         trackdesk('happy-face-ai', 'click');
+        var cookie = document.cookie.match('(^|;)\\s*trakdesk_cid\\s*=\\s*([^;]+)');
+        if (Array.isArray(cookie)) {
+            try {
+                var trakdeskCid = JSON.parse(cookie.pop() || '{}');
+                var cid = trakdeskCid['cid'];
+                
+                console.log('in tracking click, found trackdeskcid', cid);
+            } catch (e) {
+                console.log(e);
+            }
+        }
       }}
       />
     </>

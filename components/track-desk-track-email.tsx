@@ -25,6 +25,17 @@ export default function TrackDeskTrackEmail() {
         revenueOriginId: '63652d52-e0eb-40eb-9121-f53897bd804e'
       });
 
+      var cookie = document.cookie.match('(^|;)\\s*trakdesk_cid\\s*=\\s*([^;]+)');
+      if (Array.isArray(cookie)) {
+          try {
+              var trakdeskCid = JSON.parse(cookie.pop() || '{}');
+              var cid = trakdeskCid['cid'];
+              
+              console.log(`in tracking email ${user.emailAddresses[0].emailAddress}, found trackdeskcid`, cid);
+          } catch (e) {
+              console.log(e);
+          }
+      }
       console.log("TrackDesk tracking script loaded, tracking email: ", user.emailAddresses[0].emailAddress);
     }
   }, [isLoaded, user, trackingReady]);

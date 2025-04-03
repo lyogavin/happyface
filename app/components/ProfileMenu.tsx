@@ -14,6 +14,7 @@ import { User, LogOut } from "lucide-react"
 import { getUserSubscriptionStatus } from "@/lib/user-utils"
 import { IconCoin } from '@tabler/icons-react'
 import posthog from 'posthog-js'
+import TrackDeskTrackEmail from "@/components/track-desk-track-email"
 export function ProfileMenu() {
   const { user, isLoaded } = useUser()
   const clerk = useClerk()
@@ -36,36 +37,39 @@ export function ProfileMenu() {
   }, [user, isLoaded])
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-8 h-8 rounded-full">
-          <User className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuLabel className="text-sm text-muted-foreground">
-          {user?.primaryEmailAddress?.emailAddress}
-        </DropdownMenuLabel>
-        <DropdownMenuLabel className="text-sm text-muted-foreground">
-          <IconCoin className="inline mr-2 h-4 w-4" />
-          Credits: {subscriptionStatus.credits}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem asChild>
-          <a href={"/#pricing"}>
-            <IconCoin className="mr-2 h-4 w-4" />
-            <span>Buy Credits</span>
-          </a>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="w-8 h-8 rounded-full">
+            <User className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-sm text-muted-foreground">
+            {user?.primaryEmailAddress?.emailAddress}
+          </DropdownMenuLabel>
+          <DropdownMenuLabel className="text-sm text-muted-foreground">
+            <IconCoin className="inline mr-2 h-4 w-4" />
+            Credits: {subscriptionStatus.credits}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
           
-        <DropdownMenuItem onClick={() => clerk.signOut()}>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem asChild>
+            <a href={"/#pricing"}>
+              <IconCoin className="mr-2 h-4 w-4" />
+              <span>Buy Credits</span>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+            
+          <DropdownMenuItem onClick={() => clerk.signOut()}>
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <TrackDeskTrackEmail />
+    </>
   )
 } 
