@@ -551,7 +551,7 @@ export default function LandingPage() {
                     >
                       RightAI Tools Diresctory
                     </a>
-                    <a href="https://happy-face-ai.trackdesk.com/sign-up">
+                    <a href="https://happy-face-ai.trackdesk.com/sign-up" className="block px-4 py-2 text-sm hover:bg-gray-600">
                       Affiliate
                     </a>
                     {/* Add more dropdown links here as needed */}
