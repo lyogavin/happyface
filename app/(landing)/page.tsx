@@ -541,6 +541,14 @@ export default function LandingPage() {
                     >
                       Dang AI
                     </a>
+                    <a 
+                      href="https://right-ai.com/" 
+                      target="_blank" 
+                      title="RightAI Tools Directory"
+                      className="block px-4 py-2 text-sm hover:bg-gray-600"
+                    >
+                      RightAI Tools Diresctory
+                    </a>
                     {/* Add more dropdown links here as needed */}
                   </div>
                 </div>
