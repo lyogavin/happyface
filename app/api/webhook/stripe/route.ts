@@ -86,54 +86,62 @@ export async function POST(req: NextRequest) {
         // Replace the direct update with RPC call
         let attempts = 0;
         const maxAttempts = 3;
-        let data;
-        let rpcError;
-
+        let lastErrorMessage = 'Unknown error';
+        
         while (attempts < maxAttempts) {
           attempts++;
           
-          const result = await supabaseClient
-            .rpc('add_credits', {
-              p_clerk_id: userId,
-              p_credits: creditsToAdd
-            });
-          
-          data = result.data;
-          rpcError = result.error;
-          
-          if (!rpcError) {
-            break; // Success, exit the retry loop
+          try {
+            const result = await supabaseClient
+              .rpc('add_credits', {
+                p_clerk_id: userId,
+                p_credits: creditsToAdd
+              });
+            
+            const data = result.data;
+            const rpcError = result.error;
+            
+            if (!rpcError && data && data.length > 0) {
+              // Process the result inside the loop
+              const { success, new_balance, error_message } = data[0];
+              
+              if (success) {
+                console.log(`Successfully added ${creditsToAdd} credits. New balance: ${new_balance}`);
+                // Success - exit the retry loop and the entire switch case
+                return NextResponse.json({ received: true });
+              } else {
+                console.error(`RPC attempt ${attempts} returned success=false:`, error_message);
+                // Store this error message as it's likely the most useful one
+                lastErrorMessage = error_message || 'Failed to add credits (RPC returned success=false)';
+                // This is a logical failure (not a connection error), so we should retry
+              }
+            } else {
+              if (!data || data.length === 0) {
+                console.error(`RPC attempt ${attempts} returned empty data`);
+                lastErrorMessage = 'Empty response from server';
+              } else {
+                console.error(`RPC attempt ${attempts} returned error:`, rpcError);
+                lastErrorMessage = rpcError?.message || 'Database error occurred';
+              }
+            }
+          } catch (error) {
+            console.error(`RPC attempt ${attempts} threw an exception:`, error);
+            lastErrorMessage = error instanceof Error ? error.message : 'Exception during RPC call';
           }
-          
-          console.log(`RPC attempt ${attempts} failed, retrying...`, rpcError);
           
           if (attempts < maxAttempts) {
             // Exponential backoff: 500ms, 1000ms, 2000ms, etc.
-            await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, attempts - 1)));
+            const backoffTime = 500 * Math.pow(2, attempts - 1);
+            console.log(`Retrying in ${backoffTime}ms...`);
+            await new Promise(resolve => setTimeout(resolve, backoffTime));
           }
         }
 
-        if (rpcError) {
-          console.error(`Error adding credits after ${attempts} attempts:`, rpcError);
-          return NextResponse.json({ error: 'Error adding credits' }, { status: 500 });
-        }
-
-        // Check the result from the RPC call
-        // The RPC returns a query result with rows containing [success, new_balance, error_message]
-        if (!data || data.length === 0) {
-          console.error('Unexpected empty response from add_credits RPC');
-          return NextResponse.json({ error: 'Unexpected response from server' }, { status: 500 });
-        }
-
-        // Based on the RPC definition, we get a row with [success, new_balance, error_message]
-        const { success, new_balance, error_message } = data[0];
-        
-        if (!success) {
-          console.error('Failed to add credits:', error_message);
-          return NextResponse.json({ error: error_message || 'Failed to add credits' }, { status: 400 });
-        }
-        
-        console.log(`Successfully added ${creditsToAdd} credits. New balance: ${new_balance}`);
+        // If we got here, all attempts failed
+        console.error(`Failed to add credits after ${maxAttempts} attempts: ${lastErrorMessage}`);
+        return NextResponse.json({ 
+          error: `Error adding credits: ${lastErrorMessage}` 
+        }, { status: 500 });
       }
       break;
 

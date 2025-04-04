@@ -551,6 +551,11 @@ export default function LandingPage() {
                     >
                       RightAI Tools Diresctory
                     </a>
+                    <a href="https://www.toolio.ai/tool/cumface-ai" 
+                      target="_blank" 
+                      className="block px-4 py-2 text-sm hover:bg-gray-600">
+                      Toolio.ai
+                    </a>
                     <a href="https://happy-face-ai.trackdesk.com/sign-up" className="block px-4 py-2 text-sm hover:bg-gray-600">
                       Affiliate
                     </a>
