@@ -56,17 +56,43 @@ export async function upscaleAndDownload(imageUrl: string): Promise<string> {
   formData.append('file', blob);
   formData.append('response_format', 'b64_json');
 
-  // Submit to Recraft API
-  const response = await fetch('https://external.api.recraft.ai/v1/images/clarityUpscale', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${RECRAFT_API_KEY}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to upscale image');
+  // Submit to Recraft API with retry mechanism
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1000; // 1 second
+  
+  let retryCount = 0;
+  let response;
+  let error: Error | null = null;
+  
+  while (retryCount < MAX_RETRIES) {
+    try {
+      response = await fetch('https://external.api.recraft.ai/v1/images/clarityUpscale', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RECRAFT_API_KEY}`,
+        },
+        body: formData,
+      });
+      
+      if (response.ok) {
+        break; // Success, exit the retry loop
+      }
+      
+      error = new Error(`API returned status ${response.status}`);
+    } catch (e) {
+      error = e instanceof Error ? e : new Error(String(e));
+    }
+    
+    // If we get here, there was an error. Retry after delay
+    retryCount++;
+    console.log(`Recraft API call failed (attempt ${retryCount}/${MAX_RETRIES}):`, error);
+    if (retryCount < MAX_RETRIES) {
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * retryCount));
+    }
+  }
+  
+  if (!response || !response.ok) {
+    throw new Error(`Failed to upscale image after ${MAX_RETRIES} attempts: ${error?.message || 'Unknown error'}`);
   }
 
   const data = await response.json();
