@@ -20,7 +20,7 @@ const base64ToBlob = async (dataUrl: string) => {
 
 // Updated downloadImage function to handle both URLs and base64
 const downloadImage = async (url: string) => {
-  console.log("downloadImage url:", url.slice(0, 100));
+  console.log("downloadImage url:", url);
   if (url.startsWith('data:')) {
     const blob = await base64ToBlob(url);
     return new Response(blob, {

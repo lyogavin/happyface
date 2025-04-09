@@ -104,6 +104,8 @@ export async function POST(req: NextRequest) {
             if (!rpcError && data && data.length > 0) {
               // Process the result inside the loop
               const { success, new_balance, error_message } = data[0];
+
+              console.log(`adding ${creditsToAdd} credits to ${userId}. returned: ${data}`);
               
               if (success) {
                 console.log(`Successfully added ${creditsToAdd} credits. New balance: ${new_balance}`);
