@@ -78,6 +78,19 @@ export async function upscaleAndDownload(imageUrl: string): Promise<string> {
         break; // Success, exit the retry loop
       }
       
+      // check if response is json
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorResponse = await response.json();
+          console.error('Recraft API error response:', errorResponse);
+        } else {
+          console.error('Recraft API error response:', response);
+        }
+      } catch (e) {
+        console.error('Recraft API error response:', response);
+      }
+
       error = new Error(`API returned status ${response.status}`);
     } catch (e) {
       error = e instanceof Error ? e : new Error(String(e));
