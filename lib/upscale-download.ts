@@ -84,6 +84,12 @@ export async function upscaleAndDownload(imageUrl: string): Promise<string> {
         if (contentType && contentType.includes('application/json')) {
           const errorResponse = await response.json();
           console.error('Recraft API error response:', errorResponse);
+
+          // if 'image_too_big' is in 'code' of the repsonse, directly return the original image url
+          if (errorResponse.code === 'image_too_big') {
+            console.log('Recraft API error response: image_too_big, image already big enough returning original image url');
+            return imageUrl;
+          }
         } else {
           console.error('Recraft API error response:', response);
         }
