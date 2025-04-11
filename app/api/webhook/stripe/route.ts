@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
               // Process the result inside the loop
               const { success, new_balance, error_message } = data[0];
 
-              console.log(`adding ${creditsToAdd} credits to ${userId}. returned: ${data}`);
+              console.log(`adding ${creditsToAdd} credits to ${userId}. returned: ${data[0]} - ${success} - ${new_balance} - ${error_message}`);
               
               if (success) {
                 console.log(`Successfully added ${creditsToAdd} credits. New balance: ${new_balance}`);
